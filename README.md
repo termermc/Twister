@@ -6,6 +6,8 @@ Twister is a highly versitile framework, with all the features of Twist (https:/
 
 It include the following:
 ```
+  - Multi-site support
+  - Multi-domain support
   - All the features in Twist
   - Support for GET, POST, and DELETE handlers
   - Support for pre-request handlers

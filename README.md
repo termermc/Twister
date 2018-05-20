@@ -6,6 +6,8 @@ Twister is a highly versitile framework, with all the features of Twist (https:/
 
 It include the following:
 ```
+  - HTTPS support
+  - Simple API built on top of SparkJava (http://sparkjava.com/)
   - Multi-site support
   - Multi-domain support
   - All the features in Twist

@@ -24,4 +24,54 @@ It include the following:
   - Jarfile loading API
   - and more
 ```
-NOTE: Documentation soon, javadoc located at http://termermc.github.io/javadocs/twister/
+
+# How do I use it?
+To use Twister, simply execute the jarfile in the terminal, and all the necesary files and directory.
+
+Once the server has started, stop it and begin the **configuration** guide.
+
+# Configuring the Webserver
+In the directory Twister was started in, you will find the following files and directories:
+```
+modules/ - the directory to place modules
+dependencies/ - where dependency jars for modules should be places
+globalstatic/ (reconfigurable name) - where static files are served from
+domains/ - the domain file system structure directory
+404.html - the 404 page to be displayed
+forbiddenpaths.ini - list of paths that are forbidden
+linkeddomains.ini - list of domains that share the same filesystem and domain directory
+twister.ini - the main configuration file
+```
+
+**modules/**
+This is a directory that is used for placing modules in.
+
+**dependencies/**
+This is a directory where you place jars that modules depend on, so that they can be loaded into the server.
+
+**globalstatic/**
+The directory that houses all static files. Any files there can be access via get requests. If a user were to visit /image.png, the server would fetch globalstatic/image.png and serve it up. The location of "globalstatic" can be changed in **twister.ini**.
+
+**domains/**
+The core domain file system structure. It contains directories for domains, and in the domain directories are where static pages are to be placed. If you want to serve pages from the domain "localhost" you would create a directory called "localhost" inside of "domains/". Inside of that, you would place a file, such as "index.html" which would be served when a user visits "localhost". To have a webpage rendered on top of each page, create a file called "top.html" in the specific domain directory, and do the same but change it to "bottom.html" for bottom. Example of directory structure: https://termer.net/twist_structure.png
+
+**404.html**
+The webpage to be rendered when a file or RequestHandler for a page is not found.
+
+**forbiddenpaths.ini**
+List of paths that are forbidden and cannot be accessed by users.
+
+**linkeddomains.ini**
+List of domains that share the same filesystem and domain directory
+
+**twister.ini**
+The main configuration file. Descriptions for settings can be found in the file itself.
+
+# How do I build it?
+To build Twister, you must include Zip4J (http://www.lingala.net/zip4j/) and SparkJava (https://github.com/perwendel/spark) in the build path, and then build as a runnable jar.
+
+# How do I create a module?
+An example module can be found at https://github.com/termermc/ExampleTwisterModule with instructions on how to build and API examples.
+
+# Where can I find the Javadoc?
+Here: http://termermc.github.io/javadocs/twister/

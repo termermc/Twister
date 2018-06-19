@@ -3,31 +3,41 @@ package net.termer.twister;
 import static spark.Spark.*;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
 import net.termer.twister.handler.RequestHandler;
 import net.termer.twister.module.ModuleManager;
+import net.termer.twister.caching.CachingThread;
 import net.termer.twister.document.DocumentBuilder;
+import net.termer.twister.document.DocumentProcessor;
 import net.termer.twister.utils.Config;
 import net.termer.twister.utils.StringFilter;
 import net.termer.twister.utils.Writer;
+import spark.Request;
+import spark.Response;
 
 /**
  * The Twister main class.
  * Contains most main Twister methods.
  * @author termer
- *
+ * @since 0.1
  */
 public class Twister {
 	
-	// Twister version
-	public static double _VERSION_ = 0.1;
+	/**
+	 * Twister version
+	 * @since 0.1
+	 */
+	public static double _VERSION_ = 0.2;
 	
 	/**
 	 * Shared variables for using across modules
+	 * @since 0.1
 	 */
 	public HashMap<String,Object> sharedVariables = new HashMap<String,Object>();
 	
@@ -35,19 +45,26 @@ public class Twister {
 	
 	/**
 	 * Twister settings map
+	 * @since 0.1
 	 */
-	// Twister settings map
-	public static HashMap<String,String> settings = null;
+	public static HashMap<String,String> settings = new HashMap<String,String>();
+	
+	/**
+	 * Twister redirect paths map
+	 * @since 0.2
+	 */
+	public static HashMap<String,HashMap<String,String>> domainRedirects = new HashMap<String,HashMap<String,String>>();
+	
 	/**
 	 * Twister linked domains map
+	 * @since 0.1
 	 */
-	// Twister linked domains map
 	public static HashMap<String,String> linkedDomains = null;
 	
 	/**
 	 * Forbidden paths list
+	 * @since 0.1
 	 */
-	// Forbidden directories list
 	public static ArrayList<String> forbiddenPaths = new ArrayList<String>();
 	
 	// The current instance of Twister
@@ -72,9 +89,13 @@ public class Twister {
 	private File forbiddenPathsFile = new File("forbiddenpaths.ini");
 	private File dependenciesDirectory = new File("dependencies/");
 	
+	// Caching thread
+	private CachingThread cachingThread = null;
+	
 	/**
 	 * Returns the current Twister instance
 	 * @return the current Twister instance
+	 * @since 0.1
 	 */
 	public static Twister current() {
 		return twister;
@@ -82,13 +103,32 @@ public class Twister {
 	
 	/**
 	 * Instantiates Twister
+	 * @since 0.1
 	 */
 	protected Twister() {
 		
 		// Setup request handler maps
-		requestHandlers.add(new HashMap<String,HashMap<String,RequestHandler>>());
-		requestHandlers.add(new HashMap<String,HashMap<String,RequestHandler>>());
-		requestHandlers.add(new HashMap<String,HashMap<String,RequestHandler>>());
+		requestHandlers.add(new HashMap<String,HashMap<String,RequestHandler>>()); // GET
+		requestHandlers.add(new HashMap<String,HashMap<String,RequestHandler>>()); // POST
+		requestHandlers.add(new HashMap<String,HashMap<String,RequestHandler>>()); // DELETE
+		requestHandlers.add(new HashMap<String,HashMap<String,RequestHandler>>()); // PUT
+		
+		// Extract README
+		try {
+			InputStream readmeInput = getClass().getResource("/resources/README").openStream();
+			FileOutputStream readmeOut = new FileOutputStream(new File("README"));
+			while(readmeInput.available()>0) {
+				readmeOut.write(readmeInput.read());
+			}
+			readmeInput.close();
+			readmeOut.close();
+		} catch (IOException e) {
+			logError("Failed to extract README file from jar");
+			e.printStackTrace();
+		}
+		
+		// Instantiate caching thread
+		cachingThread = new CachingThread();
 		
 		// Setup files and directories
 		reloadConfigurations();
@@ -97,17 +137,11 @@ public class Twister {
 		staticFiles.externalLocation(globalstaticFile.getAbsolutePath());
 		
 		// Set port to run on
-		if(settings.containsKey("port")) {
-			port(Integer.parseInt(settings.get("port")));
-		} else {
-			port(2003);
-		}
+		port(Integer.parseInt(Settings.get("port")));
+		
 		// Set IP address to bind to
-		if(settings.containsKey("ip")) {
-			ipAddress(settings.get("ip"));
-		} else {
-			ipAddress("127.0.0.1");
-		}
+		ipAddress(Settings.get("ip"));
+		
 		// Enable HTTPS if keystore is available
 		if(settings.containsKey("keystore") && settings.containsKey("keystore-password")) {
 			File ks = new File(settings.get("keystore"));
@@ -120,11 +154,9 @@ public class Twister {
 		// as well as disallow requests to forbidden directories
 		before("*", (req, res) -> {
 			// If logging enabled, log access to console
-			if(settings.containsKey("logging")) {
-				if(settings.get("logging").toLowerCase().startsWith("t")) {
-					String ln = new java.util.Date().toString()+": GET "+req.pathInfo()+" ("+req.ip()+" "+req.userAgent()+")";
-					System.out.println(ln);
-				}
+			if(Settings.get("logging").toLowerCase().startsWith("t")) {
+				String ln = new java.util.Date().toString()+": GET "+req.pathInfo()+" ("+req.ip()+" "+req.userAgent()+")";
+				System.out.println(ln);
 			}
 			
 			// Check for a before handler and execute if present
@@ -149,158 +181,77 @@ public class Twister {
 		
 		// Handle GET requests
 		get("*", (req, res) -> {
-			// Result
-			String r = "";
-			
-			// Determine domain
-			String domain = req.url();
-			if(domain.toLowerCase().startsWith("http://")) {
-				domain=domain.substring(7);
-			} else if(domain.toLowerCase().startsWith("https://")) {
-				domain=domain.substring(8);
-			}
-			domain=domain.replaceAll(req.pathInfo(),"");
-			if(domain.contains(":")) {
-				domain=domain.split(":")[0];
-			}
-			domain=domain.toLowerCase();
-			
-			// Determine what to send
-			
-			// Determine URL with "/" added to the end of the path
-			String redirectURL = req.pathInfo()+"/";
-			if(req.queryMap().toMap().keySet().size()>0) {
-				redirectURL+="?";
-				for(String key : req.queryMap().toMap().keySet()) {
-					if(!redirectURL.endsWith("?")) {
-						redirectURL+="&";
-					}
-					redirectURL+=key+"="+StringFilter.encodeURIComponent(req.queryParams(key));
-				}
-			}
-			
-			// Determine if there is a request handler available for domain and path
-			boolean handlerAvailable = false;
-			if(requestHandlers.get(0).containsKey(domain.toLowerCase())) {
-				String path = req.pathInfo();
-				if(!path.endsWith("/")) path=path+"/";
-				if(requestHandlers.get(0).get(domain.toLowerCase()).containsKey(path.toLowerCase())) {
-					handlerAvailable = true;
-				}
-			}
-			if(new File("domains/"+domain+"/"+req.pathInfo()).isDirectory()) {
-				if(!req.pathInfo().endsWith("/")) {
-					res.redirect(redirectURL);
-				} else {
-					
-					// If handler available, use it instead of loading static
-					if(handlerAvailable) {
-						r = requestHandlers.get(0).get(domain.toLowerCase()).get(req.pathInfo().toLowerCase()).handle(req, res);
-					} else {
-						r = DocumentBuilder.loadDocument(domain, req.pathInfo(), req, res);
-					}
-				}
-			} else {
-				// If handler available, use it instead of loading static
-				if(handlerAvailable) {
-					if(!req.pathInfo().endsWith("/")) {
-						res.redirect(redirectURL);
-					} else {
-						r = requestHandlers.get(0).get(domain.toLowerCase()).get(req.pathInfo().toLowerCase()).handle(req, res);
-					}
-				} else {
-					r = DocumentBuilder.loadDocument(domain, req.pathInfo(), req, res);
-				}
-			}
-			return r;
+			return handleRequest(req, res, 0);
 		});
 		
 		// Handle POST requests
 		post("*", (req, res) -> {
-			// Result
-			String r = "";
-			
-			// Determine domain
-			String domain = req.url();
-			if(domain.toLowerCase().startsWith("http://")) {
-				domain=domain.substring(7);
-			} else if(domain.toLowerCase().startsWith("https://")) {
-				domain=domain.substring(8);
-			}
-			domain=domain.replaceAll(req.pathInfo(),"");
-			if(domain.contains(":")) {
-				domain=domain.split(":")[0];
-			}
-			domain=domain.toLowerCase();
-			
-			// Determine what to send
-			
-			// Determine URL with "/" added to the end of the path
-			String redirectURL = req.pathInfo()+"/";
-			if(req.queryMap().toMap().keySet().size()>0) {
-				redirectURL+="?";
-				for(String key : req.queryMap().toMap().keySet()) {
-					if(!redirectURL.endsWith("?")) {
-						redirectURL+="&";
-					}
-					redirectURL+=key+"="+StringFilter.encodeURIComponent(req.queryParams(key));
-				}
-			}
-			
-			// Determine if there is a request handler available for domain and path
-			boolean handlerAvailable = false;
-			if(requestHandlers.get(1).containsKey(domain.toLowerCase())) {
-				String path = req.pathInfo();
-				if(!path.endsWith("/")) path=path+"/";
-				if(requestHandlers.get(1).get(domain.toLowerCase()).containsKey(path.toLowerCase())) {
-					handlerAvailable = true;
-				}
-			}
-			if(new File("domains/"+domain+"/"+req.pathInfo()).isDirectory()) {
-				if(!req.pathInfo().endsWith("/")) {
-					res.redirect(redirectURL);
-				} else {
-					
-					// If handler available, use it instead of loading static
-					if(handlerAvailable) {
-						r = requestHandlers.get(1).get(domain.toLowerCase()).get(req.pathInfo().toLowerCase()).handle(req, res);
-					} else {
-						r = DocumentBuilder.loadDocument(domain, req.pathInfo(), req, res);
-					}
-				}
-			} else {
-				// If handler available, use it instead of loading static
-				if(handlerAvailable) {
-					if(!req.pathInfo().endsWith("/")) {
-						res.redirect(redirectURL);
-					} else {
-						r = requestHandlers.get(1).get(domain.toLowerCase()).get(req.pathInfo().toLowerCase()).handle(req, res);
-					}
-				} else {
-					r = DocumentBuilder.loadDocument(domain, req.pathInfo(), req, res);
-				}
-			}
-			return r;
+			return handleRequest(req, res, 1);
 		});
 		
 		// Handle DELETE requests
 		delete("*", (req, res) -> {
-			// Result
-			String r = "";
-			
-			// Determine domain
-			String domain = req.url();
-			if(domain.toLowerCase().startsWith("http://")) {
-				domain=domain.substring(7);
-			} else if(domain.toLowerCase().startsWith("https://")) {
-				domain=domain.substring(8);
+			return handleRequest(req, res, 2);
+		});
+		
+		// Handle PUT requests
+		put("*", (req, res) -> {
+			return handleRequest(req, res, 3);
+		});
+		
+		logInfo("Starting caching thread...");
+		if(!cachingThread.isAlive()) {
+			try {
+				cachingThread.start();
+			} catch(Exception e) {
+				logError("Error starting caching thread:");
+				e.printStackTrace();
 			}
-			domain=domain.replaceAll(req.pathInfo(),"");
-			if(domain.contains(":")) {
-				domain=domain.split(":")[0];
+		}
+		logInfo("Started.");
+	}
+	
+	
+	// Processes a request
+	private String handleRequest(Request req, Response res, int method) throws IOException {
+		// Result
+		String r = "";
+		
+		// Determine domain
+		String domain = req.url();
+		if(domain.toLowerCase().startsWith("http://")) {
+			domain=domain.substring(7);
+		} else if(domain.toLowerCase().startsWith("https://")) {
+			domain=domain.substring(8);
+		}
+		domain=domain.replaceAll(req.pathInfo(),"");
+		if(domain.contains(":")) {
+			domain=domain.split(":")[0];
+		}
+		domain=domain.toLowerCase();
+		
+		// Check if there is a redirect assigned for the requested path
+		boolean noRedirect = true;
+		if(domainRedirects.containsKey(domain)) {
+			HashMap<String,String> redirects = domainRedirects.get(domain);
+			if(redirects.containsKey("*")) {
+				noRedirect=false;
+				res.redirect(redirects.get("*"));
+			} else {
+				if(redirects.containsKey(req.pathInfo())) {
+					noRedirect=false;
+					res.redirect(redirects.get(req.pathInfo()));
+				} else if(redirects.containsKey(req.pathInfo()+'/')) {
+					noRedirect=false;
+					res.redirect(redirects.get(req.pathInfo()+'/'));
+				} else if(redirects.containsKey(req.pathInfo().substring(1))) {
+					noRedirect=false;
+					res.redirect(redirects.get(req.pathInfo().substring(1)));
+				}
 			}
-			domain=domain.toLowerCase();
-			
+		}
+		
+		if(noRedirect) {
 			// Determine what to send
 			
 			// Determine URL with "/" added to the end of the path
@@ -317,10 +268,10 @@ public class Twister {
 			
 			// Determine if there is a request handler available for domain and path
 			boolean handlerAvailable = false;
-			if(requestHandlers.get(2).containsKey(domain.toLowerCase())) {
+			if(requestHandlers.get(method).containsKey(domain.toLowerCase())) {
 				String path = req.pathInfo();
 				if(!path.endsWith("/")) path=path+"/";
-				if(requestHandlers.get(2).get(domain.toLowerCase()).containsKey(path.toLowerCase())) {
+				if(requestHandlers.get(method).get(domain.toLowerCase()).containsKey(path.toLowerCase())) {
 					handlerAvailable = true;
 				}
 			}
@@ -328,10 +279,9 @@ public class Twister {
 				if(!req.pathInfo().endsWith("/")) {
 					res.redirect(redirectURL);
 				} else {
-					
 					// If handler available, use it instead of loading static
 					if(handlerAvailable) {
-						r = requestHandlers.get(2).get(domain.toLowerCase()).get(req.pathInfo().toLowerCase()).handle(req, res);
+						r = requestHandlers.get(method).get(domain.toLowerCase()).get(req.pathInfo().toLowerCase()).handle(req, res);
 					} else {
 						r = DocumentBuilder.loadDocument(domain, req.pathInfo(), req, res);
 					}
@@ -342,25 +292,50 @@ public class Twister {
 					if(!req.pathInfo().endsWith("/")) {
 						res.redirect(redirectURL);
 					} else {
-						r = requestHandlers.get(2).get(domain.toLowerCase()).get(req.pathInfo().toLowerCase()).handle(req, res);
+						r = requestHandlers.get(method).get(domain.toLowerCase()).get(req.pathInfo().toLowerCase()).handle(req, res);
 					}
 				} else {
 					r = DocumentBuilder.loadDocument(domain, req.pathInfo(), req, res);
 				}
 			}
-			return r;
-		});
-		
+		}
+		return r;
+	}
+	
+	/**
+	 * Returns the current caching thread
+	 * @since 0.2
+	 */
+	public CachingThread getCachingThread() {
+		return cachingThread;
 	}
 	
 	/**
 	 * (Re)loads all configuration files
+	 * @since 0.1
 	 */
-	// Loads all configuration files
 	public void reloadConfigurations() {
 		// Domains directory
 		if(!domainsDir.exists()) {
 			domainsDir.mkdirs();
+		}
+		
+		// Enumerate domain redirect paths
+		domainRedirects.clear();
+		for(File dir : domainsDir.listFiles()) {
+			if(dir.isDirectory()) {
+				String tmp = dir.getPath();
+				if(!tmp.endsWith("/")) tmp+='/';
+				File redirects = new File(tmp+"redirects.ini");
+				if(redirects.exists()) {
+					try {
+						domainRedirects.put(dir.getName(), Config.parseConfig(redirects, ">", "#"));
+					} catch (IOException e) {
+						logError("Failed to load redirects file for domain "+dir.getName());
+						e.printStackTrace();
+					}
+				}
+			}
 		}
 		
 		// Dependencies directory
@@ -379,31 +354,41 @@ public class Twister {
 		}
 			
 		// Settings file
-		if(!settingsFile.exists()) {
-			try {
+		try {
+			Settings.reload();
+			if(!settingsFile.exists()) {
 				settingsFile.createNewFile();
-				Writer.print("# IP address to bind to\n"+
-						"ip: 127.0.0.1\n\n"+
-						"# Port to run server on\n"+
-						"port: 2003\n\n"+
+				String stngs = "# IP address to bind to\n"+
+						"ip: "+Settings.getDefault("ip")+"\n\n"+
+						"# Port to the run server on\n"+
+						"port: "+Settings.getDefault("port")+"\n\n"+
 						"# Java Keystore path to use to enable HTTPS\n"+
 						"# Leave commented out to disable HTTPS\n"+
-						"#keystore: keystore.jks\n\n"+
+						"#keystore: "+Settings.getDefault("keystore")+"\n\n"+
 						"# Keystore password\n"+
-						"#keystore-password: drowssap\n\n"+
+						"#keystore-password: "+Settings.getDefault("keystore-password")+"\n\n"+
 						"# Enable/Disable logging\n"+
-						"logging: true\n\n"+
+						"logging: "+Settings.getDefault("logging")+"\n\n"+
 						"# Global static directory location\n"+
-						"static: globalstatic/\n\n"+
+						"static: "+Settings.getDefault("static")+"\n\n"+
 						"# Default domain for modules to access\n"+
-						"default-domain: localhost", settingsFile);
-			} catch(IOException e) {
-				e.printStackTrace();
+						"default-domain: "+Settings.getDefault("default-domain")+"\n\n"+
+						"# Whether Twister should cache files such as\n"+
+						"# domain tops and bottoms and 404 messages in\n"+
+						"# RAM, instead of serving them from disk\n"+
+						"caching: "+Settings.getDefault("caching")+"\n\n"+
+						"# The interval in seconds when Twister should\n"+
+						"# update the cached files in RAM\n"+
+						"caching-interval: "+Settings.getDefault("caching-interval");
+				Writer.print(stngs, settingsFile);
 			}
+		} catch(IOException e) {
+			e.printStackTrace();
 		}
+		
 		// Parse settings
 		try {
-			settings = Config.parseConfig(settingsFile, ":", "#");
+			Settings.reload();
 		} catch(IOException e) {
 			System.err.println("=========================\n"+
 							   "Failed to parse settings\n"+
@@ -412,21 +397,14 @@ public class Twister {
 		}
 		
 		// Set default domain
-		if(settings.containsKey("default-domain")) {
-			defaultDomain = settings.get("default-domain");
-		} else {
-			defaultDomain = "localhost";
-		}
+		defaultDomain = Settings.get("default-domain");
 		
 		// If static directory is set in the settings file, apply it
-		if(settings.containsKey("static")) {
-			File dir = new File(settings.get("static"));
-			if(!dir.exists()) {
-				dir.mkdirs();
-			}
-			globalstaticFile = dir;
-			staticFiles.externalLocation(globalstaticFile.getAbsolutePath());
+		File dir = new File(Settings.get("static"));
+		if(!dir.exists()) {
+			dir.mkdirs();
 		}
+		globalstaticFile = dir;
 		
 		// Linked Domains file
 		if(!linkedFile.exists()) {
@@ -445,6 +423,7 @@ public class Twister {
 				e.printStackTrace();
 			}
 		}
+		
 		// Parse linked domains
 		try {
 			linkedDomains = Config.parseConfig(linkedFile, ">", "#");
@@ -481,6 +460,10 @@ public class Twister {
 		} catch(IOException e) {
 			e.printStackTrace();
 		}
+		
+		// Re-cache files
+		CachingThread.cache404();
+		CachingThread.cacheTopsAndBottoms();
 	}
 	
 	/**
@@ -488,9 +471,9 @@ public class Twister {
 	 * @param domain - the domain to register the handler for
 	 * @param path - the path to register the handler for
 	 * @param handler - the handler
-	 * @param method - the HTTP method (Method.GET/POST/DELETE)
+	 * @param method - the HTTP method (Method.GET/POST/DELETE/PUT)
+	 * @since 0.1
 	 */
-	// Method to register request handlers
 	public void addRequestHandler(String domain, String path, RequestHandler handler, int method) {
 		// Determine correct request handler map
 		
@@ -519,8 +502,8 @@ public class Twister {
 	 * @param domain - the domain to unregister the handler from
 	 * @param path - the path to unregister the handler from
 	 * @param method - the HTTP method (Method.GET/POST/DELETE) to unregister the handler from
+	 * @since 0.1
 	 */
-	// Method to unregister a request handler
 	public void removeRequestHandler(String domain, String path, int method) {
 		if(requestHandlers.get(method).containsKey(domain.toLowerCase())) {
 			requestHandlers.get(method).get(domain.toLowerCase()).remove(path.toLowerCase());
@@ -530,10 +513,94 @@ public class Twister {
 	}
 	
 	/**
+	 * Method to register a DocumentProcessor for domain
+	 * @param domain the domain
+	 * @param processor the DocumentProcessor
+	 * @since 0.2
+	 */
+	public void addDocumentProcessor(String domain, DocumentProcessor processor) {
+		if(!DocumentBuilder._DOCUMENT_PROCESSORS_.containsKey(domain)) {
+			DocumentBuilder._DOCUMENT_PROCESSORS_.put(domain, new ArrayList<DocumentProcessor>());
+		}
+		DocumentBuilder._DOCUMENT_PROCESSORS_.get(domain).add(processor);
+	}
+	
+	/**
+	 * Method to unregister a DocumentProcessor for domain
+	 * @param domain the domain
+	 * @param processor the processor
+	 * @since 0.2
+	 */
+	public void removeDocumentProcessor(String domain, DocumentProcessor processor) {
+		if(DocumentBuilder._DOCUMENT_PROCESSORS_.containsKey(domain)) {
+			DocumentBuilder._DOCUMENT_PROCESSORS_.get(domain).remove(processor);
+			if(DocumentBuilder._DOCUMENT_PROCESSORS_.size()<1) {
+				DocumentBuilder._DOCUMENT_PROCESSORS_.remove(domain);
+			}
+		}
+	}
+	
+	/**
+	 * Method to register a DocumentProcessor for domain top
+	 * @param domain the domain
+	 * @param processor the DocumentProcessor
+	 * @since 0.2
+	 */
+	public void addTopDocumentProcessor(String domain, DocumentProcessor processor) {
+		if(!DocumentBuilder._DOCUMENT_TOP_PROCESSORS_.containsKey(domain)) {
+			DocumentBuilder._DOCUMENT_TOP_PROCESSORS_.put(domain, new ArrayList<DocumentProcessor>());
+		}
+		DocumentBuilder._DOCUMENT_TOP_PROCESSORS_.get(domain).add(processor);
+	}
+	
+	/**
+	 * Method to unregister a DocumentProcessor for domain top
+	 * @param domain the domain
+	 * @param processor the processor
+	 * @since 0.2
+	 */
+	public void removeTopDocumentProcessor(String domain, DocumentProcessor processor) {
+		if(DocumentBuilder._DOCUMENT_TOP_PROCESSORS_.containsKey(domain)) {
+			DocumentBuilder._DOCUMENT_TOP_PROCESSORS_.get(domain).remove(processor);
+			if(DocumentBuilder._DOCUMENT_TOP_PROCESSORS_.size()<1) {
+				DocumentBuilder._DOCUMENT_TOP_PROCESSORS_.remove(domain);
+			}
+		}
+	}
+	
+	/**
+	 * Method to register a DocumentProcessor for domain bottom
+	 * @param domain the domain
+	 * @param processor the DocumentProcessor
+	 * @since 0.2
+	 */
+	public void addBottomDocumentProcessor(String domain, DocumentProcessor processor) {
+		if(!DocumentBuilder._DOCUMENT_BOTTOM_PROCESSORS_.containsKey(domain)) {
+			DocumentBuilder._DOCUMENT_BOTTOM_PROCESSORS_.put(domain, new ArrayList<DocumentProcessor>());
+		}
+		DocumentBuilder._DOCUMENT_BOTTOM_PROCESSORS_.get(domain).add(processor);
+	}
+	
+	/**
+	 * Method to unregister a DocumentProcessor for domain bottom
+	 * @param domain the domain
+	 * @param processor the processor
+	 * @since 0.2
+	 */
+	public void removeBottomDocumentProcessor(String domain, DocumentProcessor processor) {
+		if(DocumentBuilder._DOCUMENT_BOTTOM_PROCESSORS_.containsKey(domain)) {
+			DocumentBuilder._DOCUMENT_BOTTOM_PROCESSORS_.get(domain).remove(processor);
+			if(DocumentBuilder._DOCUMENT_BOTTOM_PROCESSORS_.size()<1) {
+				DocumentBuilder._DOCUMENT_BOTTOM_PROCESSORS_.remove(domain);
+			}
+		}
+	}
+	
+	/**
 	 * Returns whether a before handler is present
 	 * @return whether a before handler is present
+	 * @since 0.1
 	 */
-	// Returns whether a before handler is present
 	public boolean isBeforeHandlerPresent() {
 		return beforeHandler!=null;
 	}
@@ -541,8 +608,8 @@ public class Twister {
 	/**
 	 * Returns the handler that gets executed before all requests
 	 * @return the handler that gets executed before all requests
+	 * @since 0.1
 	 */
-	// Returns the handler that gets executed before all requests
 	public RequestHandler getBeforeRequestHandler() {
 		return beforeHandler;
 	}
@@ -551,16 +618,16 @@ public class Twister {
 	 * Sets the handler to be executed before all requests
 	 * Setting to null will clear the handler
 	 * @param handler the handler to execute before all requests
+	 * @since 0.1
 	 */
-	// Sets the handler to be executed before all requests
 	public void setBeforeRequestHandler(RequestHandler handler) {
 		beforeHandler = handler;
 	}
 	
 	/**
 	 * Clears the before request handler
+	 * @since 0.1
 	 */
-	// Clears the before request handler
 	public void clearBeforeRequestHandler() {
 		beforeHandler = null;
 	}
@@ -568,8 +635,8 @@ public class Twister {
 	/**
 	 * Returns the default domain to be used by modules
 	 * @return the default domain to be used by modules
+	 * @since 0.1
 	 */
-	// Returns the default domain to be used by modules
 	public String getDefaultDomain() {
 		return defaultDomain;
 	}
@@ -579,8 +646,8 @@ public class Twister {
 	 * @param domain - the domain
 	 * @param method - the method
 	 * @return a list of handlers assigned to the specified domain and method
+	 * @since 0.1
 	 */
-	// Returns a list of handlers assigned to the specified domain and method
 	public RequestHandler[] getRequestHandlers(String domain, int method) {
 		ArrayList<RequestHandler> handlers = new ArrayList<RequestHandler>();
 		if(requestHandlers.size()>method) {
@@ -599,8 +666,8 @@ public class Twister {
 	 * @param method - the method
 	 * @param path - the path
 	 * @return whether the specified domain, method, and path has a RequestHandler assigned to it
+	 * @since 0.1
 	 */
-	// Returns whether the specified domain, method, and path has a RequestHandler assigned to it
 	public boolean hasRequestHandler(String domain, int method, String path) {
 		boolean has = false;
 		
@@ -623,8 +690,8 @@ public class Twister {
 	 * @param method - the method
 	 * @param path - the path
 	 * @return the RequestHandler for the specified domain, method, and path
+	 * @since 0.1
 	 */
-	// Returns the RequestHandler for the specified domain, method, and path
 	public RequestHandler getRequestHandler(String domain, int method, String path) {
 		RequestHandler handler = null;
 		
@@ -645,8 +712,8 @@ public class Twister {
 	/**
 	 * Log info message to the console
 	 * @param msg - the message to log
+	 * @since 0.1
 	 */
-	// Log info message to the console
 	public void logInfo(String msg) {
 		String prefix = new Date().toString()+" INFO ";
 		if(msg.contains("\n")) {
@@ -659,10 +726,26 @@ public class Twister {
 	}
 	
 	/**
+	 * Log warning message to the console
+	 * @param msg - the message to log
+	 * @since 0.2
+	 */
+	public void logWarning(String msg) {
+		String prefix = new Date().toString()+" WARNING ";
+		if(msg.contains("\n")) {
+			System.out.println(prefix+msg);
+		} else {
+			for(String str : msg.split("\n")) {
+				System.out.println(prefix+str);
+			}
+		}
+	}
+	
+	/**
 	 * Log error message to the console
 	 * @param msg - the message to log
+	 * @since 0.1
 	 */
-	// Log error message to the console
 	public void logError(String msg) {
 		String prefix = new Date().toString()+" ERROR ";
 		if(msg.contains("\n")) {
@@ -676,11 +759,11 @@ public class Twister {
 	
 	/**
 	 * Safely shutdown Twister and all of its modules
+	 * @since 0.1
 	 */
-	// Safely shutdown Twister and all of its modules
 	public void shutdown() {
 		logInfo("Shutting down Twister...");
-		ModuleManager.unloadModules();
+		ModuleManager.shutdownModules();
 		System.exit(0);
 	}
 }

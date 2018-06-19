@@ -3,17 +3,46 @@ package net.termer.twister.document;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import spark.Request;
 import spark.Response;
+import net.termer.twister.Settings;
 import net.termer.twister.Twister;
+import net.termer.twister.caching.TwisterCache;
 
 /**
  * Utility class to render webpages from file paths
  * @author termer
- *
+ * @since 0.1
  */
 public class DocumentBuilder {
+	
+	/**
+	 * DocumentProcessors for domains
+	 * Key: Domain
+	 * Value: ArrayList of DocumentProcessors
+	 * @since 0.2
+	 */
+	public static HashMap<String,ArrayList<DocumentProcessor>> _DOCUMENT_PROCESSORS_ = new HashMap<String,ArrayList<DocumentProcessor>>();
+	
+	/**
+	 * DocumentProcessors for domain tops
+	 * Key: Domain
+	 * Value: ArrayList of DocumentProcessors
+	 * @since 0.2
+	 */
+	public static HashMap<String,ArrayList<DocumentProcessor>> _DOCUMENT_TOP_PROCESSORS_ = new HashMap<String,ArrayList<DocumentProcessor>>();
+	
+	/**
+	 * DocumentProcessors for domain bottoms
+	 * Key: Domain
+	 * Value: ArrayList of DocumentProcessors
+	 * @since 0.2
+	 */
+	public static HashMap<String,ArrayList<DocumentProcessor>> _DOCUMENT_BOTTOM_PROCESSORS_ = new HashMap<String,ArrayList<DocumentProcessor>>();
+	
 	
 	/**
 	 * Renders a webpage using the provided domain, path, request, and response.
@@ -25,6 +54,7 @@ public class DocumentBuilder {
 	 * @param res the Response
 	 * @return the rendered document
 	 * @throws IOException if reading the webpage fails
+	 * @since 0.1
 	 */
 	public static String loadDocument(String domain, String path, Request req, Response res) throws IOException {
 		String r = "";
@@ -56,21 +86,41 @@ public class DocumentBuilder {
 				path+="index.html";
 			}
 			if(document.exists()) {
-				File top = new File("domains/"+domain+"/top.html");
-				File bottom = new File("domains/"+domain+"/bottom.html");
-				if(top.exists()) {
-					r=readFile(top.getPath());
+				if(Boolean.parseBoolean(Settings.get("caching"))) {
+					if(TwisterCache._TOPS_.containsKey(domain)) {
+						r=processTopDocument(path, TwisterCache._TOPS_.get(domain), domain, req, res);
+					}
+				} else {
+					File topFile = new File("domains/"+domain+"/top.html");
+					if(topFile.exists()) {
+						r=processTopDocument(path, readFile(topFile.getPath()), domain, req, res);
+					}
 				}
-				r+=readFile(document.getPath());
-				if(bottom.exists()) {
-					r+=readFile(bottom.getPath());
+				r+=processDocument(path, readFile(document.getPath()), domain, req, res);
+				if(Boolean.parseBoolean(Settings.get("caching"))) {
+					if(TwisterCache._BOTTOMS_.containsKey(domain)) {
+						r+=processBottomDocument(path, TwisterCache._BOTTOMS_.get(domain), domain, req, res);
+					}
+				} else {
+					File bottomFile = new File("domains/"+domain+"/bottom.html");
+					if(bottomFile.exists()) {
+						r+=processBottomDocument(path, readFile(bottomFile.getPath()), domain, req, res);
+					}
 				}
 			} else {
-				r = readFile("404.html");
+				if(Boolean.parseBoolean(Settings.get("caching"))) {
+					r = TwisterCache._404_;
+				} else {
+					r = readFile("404.html");
+				}
 				res.status(404);
 			}
 		} else {
-			r = readFile("404.html");
+			if(Boolean.parseBoolean(Settings.get("caching"))) {
+				r = TwisterCache._404_;
+			} else {
+				r = readFile("404.html");
+			}
 			res.status(404);
 		}
 		} catch(Exception e) {
@@ -84,6 +134,7 @@ public class DocumentBuilder {
 	 * @param path the absolute path of the file
 	 * @return the content of the file as a String
 	 * @throws IOException if reading the file fails, or file does not exist
+	 * @since 0.1
 	 */
 	public static String readFile(String path) throws IOException {
 		String r = "";
@@ -92,6 +143,79 @@ public class DocumentBuilder {
 			r+=(char)fin.read();
 		}
 		fin.close();
+		return r;
+	}
+	
+	
+	/**
+	 * Process a document using registered DocumentProcessors
+	 * @param path the path of the document (not file path)
+	 * @param text the text of the document
+	 * @param domain the domain
+	 * @param req the request
+	 * @param res the response
+	 * @return the processed document
+	 * @since 0.2
+	 */
+	public static String processDocument(String path, String text, String domain, Request req, Response res) {
+		String r = text;
+		
+		if(_DOCUMENT_PROCESSORS_.containsKey(domain)) {
+			HTMLDocumentResponse docResp = new HTMLDocumentResponse(path, domain, domain+path, text);
+			for(DocumentProcessor dp : _DOCUMENT_PROCESSORS_.get(domain)) {
+				dp.process(docResp, req, res);
+			}
+			r = docResp.getText();
+		}
+		
+		return r;
+	}
+	
+	/**
+	 * Process a domain top using registered DocumentProcessors
+	 * @param path the path of the document (not file path)
+	 * @param text the text of the document
+	 * @param domain the domain
+	 * @param req the request
+	 * @param res the response
+	 * @return the processed document
+	 * @since 0.2
+	 */
+	public static String processTopDocument(String path, String text, String domain, Request req, Response res) {
+		String r = text;
+		
+		if(_DOCUMENT_TOP_PROCESSORS_.containsKey(domain)) {
+			HTMLDocumentResponse docResp = new HTMLDocumentResponse(path, domain, domain+path, text);
+			for(DocumentProcessor dp : _DOCUMENT_TOP_PROCESSORS_.get(domain)) {
+				dp.process(docResp, req, res);
+			}
+			r = docResp.getText();
+		}
+		
+		return r;
+	}
+	
+	/**
+	 * Process a domain bottom using registered DocumentProcessors
+	 * @param path the path of the document (not file path)
+	 * @param text the text of the document
+	 * @param domain the domain
+	 * @param req the request
+	 * @param res the response
+	 * @return the processed document
+	 * @since 0.2
+	 */
+	public static String processBottomDocument(String path, String text, String domain, Request req, Response res) {
+		String r = text;
+		
+		if(_DOCUMENT_BOTTOM_PROCESSORS_.containsKey(domain)) {
+			HTMLDocumentResponse docResp = new HTMLDocumentResponse(path, domain, domain+path, text);
+			for(DocumentProcessor dp : _DOCUMENT_BOTTOM_PROCESSORS_.get(domain)) {
+				dp.process(docResp, req, res);
+			}
+			r = docResp.getText();
+		}
+		
 		return r;
 	}
 }

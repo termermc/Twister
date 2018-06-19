@@ -16,7 +16,7 @@ import net.termer.twister.exception.JarLoaderException;
 /**
  * Utility class for loading classes from a jarfile
  * @author termer
- *
+ * @since 0.1
  */
 public class JarLoader {
 	private static ArrayList<ClassLoader> cl = new ArrayList<ClassLoader>();
@@ -28,6 +28,7 @@ public class JarLoader {
 	 * @throws ZipException if reading the jarfile fails
 	 * @throws IOException if loading the jarfile fails
 	 * @throws ClassNotFoundException if loading a class from the jarfile fails
+	 * @since 0.1
 	 */
 	@SuppressWarnings("rawtypes")
 	public static Class[] loadJar(File jar) throws ZipException, IOException, ClassNotFoundException {
@@ -69,6 +70,7 @@ public class JarLoader {
 	 * @throws ClassNotFoundException if loading a class from a jarfile fails
 	 * @throws ZipException if reading a jarfile fails
 	 * @throws IOException if loading a jarfile fails
+	 * @since 0.1
 	 */
 	@SuppressWarnings("rawtypes")
 	public static Class[] loadJars(File dir) throws ClassNotFoundException, ZipException, IOException {

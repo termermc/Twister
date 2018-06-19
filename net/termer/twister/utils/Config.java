@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * Utility class for reading/writing configuration files
  * @author termer
- *
+ * @since 0.1
  */
 public class Config {
 	
@@ -24,9 +24,8 @@ public class Config {
 	 * @param comment - the String in the configuration File that is used to start a comment, such as "#"
 	 * @return the HashMap of all keys and values from the configuration file
 	 * @throws IOException if reading the configuration File fails
+	 * @since 0.1
 	 */
-	// Parse a configuration file into a HashMap of values and keys.
-	// Ignores comments and blank lines, as well as comments.
 	public static HashMap<String,String> parseConfig(File configFile, String separate, String comment) throws IOException {
 		HashMap<String,String> map = new HashMap<String,String>();
 		// Setup readers
@@ -63,8 +62,8 @@ public class Config {
 	 * @param separate - the String in the configuration File that separates the key from the value, such as ":"
 	 * @param comment - the String in the configuration File that is used to start a comment, such as "#"
 	 * @throws IOException if reading or writing the configuration File fails
+	 * @since 0.1
 	 */
-	// Adds a field and value to config
 	public static void addField(File configFile, String field, String value, String separate, String comment) throws IOException {
 		// Read config
 		HashMap<String,String> map = parseConfig(configFile, separate, comment);
@@ -92,8 +91,8 @@ public class Config {
 	 * @param separate - the String in the configuration File that separates the key from the value, such as ":"
 	 * @param comment - the String in the configuration File that is used to start a comment, such as "#"
 	 * @throws IOException if reading or writing the configuration File fails
+	 * @since 0.1
 	 */
-	// Remove field and value from a configuration File
 	public static void removeField(File configFile, String field, String separate, String comment) throws IOException {
 		// Read config
 		HashMap<String,String> map = parseConfig(configFile, separate, comment);
@@ -120,8 +119,8 @@ public class Config {
 	 * @param map - the Map to generate the configuration File from
 	 * @param separate - the String in the configuration File that separates the key from the value, such as ":"
 	 * @throws IOException if writing the configuration File fails
+	 * @since 0.1
 	 */
-	// Create configuration File from map
 	public static void createConfig(File configFile, Map<String,String> map, String separate) throws IOException {
 		// Convert into string
 		String cfgStr = "";
@@ -144,8 +143,8 @@ public class Config {
 	 * @param separate - the String in the configuration File that separates the key from the value, such as ":"
 	 * @param comment - the String in the configuration File that is used to start a comment, such as "#"
 	 * @throws IOException - if reading or writing the configuration File fails
+	 * @since 0.1
 	 */
-	// Change the value of a field (key)
 	public static void changeValue(File configFile, String field, String value, String separate, String comment) throws IOException {
 		// Read config
 		HashMap<String,String> map = parseConfig(configFile, separate, comment);
@@ -172,8 +171,8 @@ public class Config {
 	 * @param comment - the String in the configuration File that is used to start a comment, such as "#"
 	 * @return the lines of the configuration File
 	 * @throws IOException if reading the configuration File fails
+	 * @since 0.1
 	 */
-	// Get the lines of a configuration File in an ArrayList
 	public static ArrayList<String> getLines(File configFile, String comment) throws IOException {
 		ArrayList<String> lines = new ArrayList<String>();
 		
@@ -205,8 +204,8 @@ public class Config {
 	 * @param comment - the String in the configuration File that is used to start a comment, such as "#"
 	 * @return the lines of the configuration File
 	 * @throws IOException if reading the configuration File fails
+	 * @since 0.1
 	 */
-	// Get the lines of a configuration File in an Array
 	public static String[] getLinesArray(File configFile, String comment) throws IOException {
 		return getLines(configFile, comment).toArray(new String[0]);
 	}

@@ -8,13 +8,14 @@ import net.termer.twister.module.ModuleManager;
 /**
  * Launcher class for Twister
  * @author termer
- *
+ * @since 0.1
  */
 public class Launcher {
 	
 	/**
 	 * Launch Twiser
 	 * @param args - the launch arguments
+	 * @since 0.1
 	 */
 	// Launch Twiser
 	public static void main(String[] args) {

@@ -71,6 +71,7 @@ List of domains that share the same filesystem and domain directory
 The main configuration file. Descriptions for settings can be found in the file itself.
 
 # Configuring redirects
+```
 Domain redirect files are useful for link shortening, as well as fixing links that are in a new location.
   To add a domain redirect file, simply create a file called "redirects.ini" inside the root of your desired
   domain directory.
@@ -80,6 +81,7 @@ Domain redirect files are useful for link shortening, as well as fixing links th
     * > REDIRECT_URL
   Example:
     /redirect/ > http://www.example.com/
+ ```
 
 # How do I build it?
 To build Twister, you must include Zip4J (http://www.lingala.net/zip4j/) and SparkJava (https://github.com/perwendel/spark) in the build path, and then build as a runnable jar.

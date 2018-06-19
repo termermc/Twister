@@ -91,4 +91,6 @@ NOTE: It is recommended that you use maven to include Spark, as it will automati
 An example module can be found at https://github.com/termermc/ExampleTwisterModule with instructions on how to build and API examples.
 
 # Where can I find the Javadoc?
-Here: http://termermc.github.io/javadocs/twister/
+Here: https://termer.net/javadocs/twister/
+
+Click the version you want, and you will be presented the javadoc

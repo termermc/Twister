@@ -11,8 +11,11 @@ It include the following:
   - Multi-site support
   - Multi-domain support
   - All the features in Twist
-  - Support for GET, POST, and DELETE handlers
+  - Support for GET, POST, DELETE, and PUT handlers
   - Support for pre-request handlers
+  - Support for static document manipulation before response
+  - Easy configurable redirects
+  - File caching for lightning-quick responses
   - Reloading configurations without restarting the server
   - Timestamped logging
   - Shutting down the server via API
@@ -67,8 +70,20 @@ List of domains that share the same filesystem and domain directory
 **twister.ini**
 The main configuration file. Descriptions for settings can be found in the file itself.
 
+# Configuring redirects
+Domain redirect files are useful for link shortening, as well as fixing links that are in a new location.
+  To add a domain redirect file, simply create a file called "redirects.ini" inside the root of your desired
+  domain directory.
+  To add a redirect for a specific path, simply add the following line (replacing the uppercase text):
+    PATH > REDIRECT_URL
+  To make all requests to the desired domain redirect, add the following line (replacing the uppercase text):
+    * > REDIRECT_URL
+  Example:
+    /redirect/ > http://www.example.com/
+
 # How do I build it?
 To build Twister, you must include Zip4J (http://www.lingala.net/zip4j/) and SparkJava (https://github.com/perwendel/spark) in the build path, and then build as a runnable jar.
+NOTE: It is recommended that you use maven to include Spark, as it will automatically download spark dependencies.
 
 # How do I create a module?
 An example module can be found at https://github.com/termermc/ExampleTwisterModule with instructions on how to build and API examples.

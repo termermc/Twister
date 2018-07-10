@@ -56,7 +56,7 @@ This is a directory where you place jars that modules depend on, so that they ca
 The directory that houses all static files. Any files there can be access via get requests. If a user were to visit /image.png, the server would fetch globalstatic/image.png and serve it up. The location of "globalstatic" can be changed in **twister.ini**.
 
 **domains/**
-The core domain file system structure. It contains directories for domains, and in the domain directories are where static pages are to be placed. If you want to serve pages from the domain "localhost" you would create a directory called "localhost" inside of "domains/". Inside of that, you would place a file, such as "index.html" which would be served when a user visits "localhost". To have a webpage rendered on top of each page, create a file called "top.html" in the specific domain directory, and do the same but change it to "bottom.html" for bottom. Example of directory structure: https://termer.net/twist_structure.png
+The core domain file system structure. It contains directories for domains, and in the domain directories are where static pages are to be placed. If you want to serve pages from the domain "localhost" you would create a directory called "localhost" inside of "domains/". Inside of that, you would place a file, such as "index.html" which would be served when a user visits "localhost". To have a webpage rendered on top of each page, create a file called "top.html" in the specific domain directory, and do the same but change it to "bottom.html" for bottom. Example of directory structure: ![example directory structure](https://termer.net/twist_structure.png)
 
 **404.html**
 The webpage to be rendered when a file or RequestHandler for a page is not found.

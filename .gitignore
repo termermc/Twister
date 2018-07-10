@@ -8,3 +8,7 @@ forbiddenpaths.ini
 linkeddomains.ini
 README
 twister.ini
+/modules/
+/globalstatic/
+/domains/
+/dependencies/

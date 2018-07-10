@@ -1,3 +1,14 @@
+=== Version 0.3 ===
+This version is meant to add many important features that were lacking in previous releases
+by introducing a routing API, individual 404 pages for domains, and a database library for
+several SQL databases.
+
+Changes in this release:
+  - Added routing (TODO)
+  - Added individual 404 pages for domains (TODO)
+  - Added UniversalDB library for database SQL database interaction
+
+
 === Version 0.2 ===
 This version focuses on fixing the lacking functionality and control of the
 initial release, as well as add more out-of-the-box features.

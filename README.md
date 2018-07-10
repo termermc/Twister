@@ -94,3 +94,11 @@ An example module can be found at https://github.com/termermc/ExampleTwisterModu
 Here: https://termer.net/javadocs/twister/
 
 Click the version you want, and you will be presented the javadoc
+
+# Current development version
+The current version being developed is version **0.3**, and additionally requires the [UniversalDB](https://github.com/TermerMC/UniversalDB) library to compile. In 0.3, routes and individual 404 pages for domains are being added.
+
+Checklist:
+  - **TODO** Routes
+  - **TODO** Individual 404 pages for domains
+  - **DONE** Inclusion of the UniversalDB library

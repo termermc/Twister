@@ -1,12 +1,15 @@
 === Version 0.3 ===
 This version is meant to add many important features that were lacking in previous releases
-by introducing a routing API, individual 404 pages for domains, and a database library for
-several SQL databases.
+by introducing a routing API, individual 404 pages for domains, a database library for
+several SQL databases, and PreRequestHandlers for manipulating requests before they get
+passed to the request processor.
 
 Changes in this release:
   - Added routing (TODO)
   - Added individual 404 pages for domains (TODO)
   - Added UniversalDB library for database SQL database interaction
+  - PreRequestHandlers for manipulating requests before they get passed
+    to the request processor
 
 
 === Version 0.2 ===

@@ -71,6 +71,23 @@ public class Domain {
 	}
 	
 	/**
+	 * Returns whether the domain has a "404.html" file, or a cached version
+	 * @return whether the domain has a "404.html" file, or a cached version
+	 * @since 0.3
+	 */
+	public boolean has404() {
+		boolean has = false;
+		
+		if(Boolean.parseBoolean(Settings.get("caching"))) {
+			has = TwisterCache._404S_.containsKey(_NAME_);
+		} else {
+			has = new File("domains/"+_NAME_+"/404.html").exists();
+		}
+		
+		return has;
+	}
+	
+	/**
 	 * Returns the file system path to this domain's "top.html" file, if any
 	 * @return the file system path to this domain's "top.html" file, if any
 	 * @since 0.1
@@ -141,6 +158,26 @@ public class Domain {
 	}
 	
 	/**
+	 * Returns the 404 page for domain, if any
+	 * @return the 404 page for domain
+	 * @throws IOException if reading the domain's 404 page fails
+	 * @since 0.3
+	 */
+	public String get404() throws IOException {
+		String r= null;
+		
+		if(has404()) {
+			if(Boolean.parseBoolean(Settings.get("caching"))) {
+				r = TwisterCache._404S_.get(_NAME_);
+			} else {
+				r = DocumentBuilder.readFile("domains/"+_NAME_+"/404.html");
+			}
+		}
+		
+		return r;
+	}
+	
+	/**
 	 * Returns the processed version of the domain's top, if any
 	 * @param req the request
 	 * @param res the response
@@ -171,6 +208,24 @@ public class Domain {
 		
 		if(r!=null) {
 			r = DocumentBuilder.processBottomDocument("bottom.html", r, _NAME_, req, res);
+		}
+		
+		return r;
+	}
+	
+	/**
+	 * Returns the processed version of the domain's 404 page, if any
+	 * @param req the request
+	 * @param res the response
+	 * @return the processed 404 page
+	 * @throws IOException if reading the 404 document fails
+	 * @since 0.3
+	 */
+	public String getProcessed404(Request req, Response res) throws IOException {
+		String r = get404();
+		
+		if(r!=null) {
+			r = DocumentBuilder.processDocument("404.html", r, _NAME_, req, res);
 		}
 		
 		return r;

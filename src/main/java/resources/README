@@ -10,6 +10,7 @@ Changes in this release:
   - Added UniversalDB library for database SQL database interaction
   - PreRequestHandlers for manipulating requests before they get passed
     to the request processor
+  - Disabled and deprecated all BeforeHandler methods
 
 
 === Version 0.2 ===

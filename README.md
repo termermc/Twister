@@ -103,6 +103,6 @@ The current version being developed is version **0.3**, and additionally require
 
 Checklist:
   - **TODO** Routes
-  - **TODO** Individual 404 pages for domains
+  - **DONE** Individual 404 pages for domains
   - **DONE** Inclusion of the UniversalDB library
   - **DONE** PreRequestHandlers to handle requests before they are sent to the request processor

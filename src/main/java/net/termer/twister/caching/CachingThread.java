@@ -50,7 +50,7 @@ public class CachingThread extends Thread {
 	}
 	
 	/**
-	 * Caches all 404 messages
+	 * Caches all 404 page
 	 * @since 0.2
 	 */
 	public static void cache404() {
@@ -59,6 +59,30 @@ public class CachingThread extends Thread {
 		} catch (IOException e) {
 			Twister.current().logError("Failed to cache 404.html");
 			e.printStackTrace();
+		}
+		
+		// Clear cached 404 pages
+		TwisterCache._404S_.clear();
+		
+		File domainsDir = new File("domains/");
+		for(File dir : domainsDir.listFiles()) {
+			if(dir.isDirectory()) {
+				String domain = dir.getName();
+				
+				// Cycle through domain's files
+				for(File domainFile : dir.listFiles()) {
+					if(domainFile.isFile()) {
+						if(StringFilter.same(domainFile.getName(),"404.html")) {
+							try {
+								TwisterCache._404S_.put(domain, DocumentBuilder.readFile(domainFile.getAbsolutePath()));
+							} catch (IOException e) {
+								Twister.current().logError("Failed to cache 404.html for domain "+domain);
+								e.printStackTrace();
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 	

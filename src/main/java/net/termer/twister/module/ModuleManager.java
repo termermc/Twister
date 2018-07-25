@@ -78,7 +78,7 @@ public class ModuleManager {
 					while(ent.hasMoreElements()) {
 						String name = ent.nextElement().getName();
 						if(name.toLowerCase().endsWith(".class")) {
-							classes.add(name.replaceAll("/", ".").replaceAll(".class", ""));
+							classes.add(name.replace("/", ".").replace(".class", ""));
 						}
 					}
 					jf.close();
@@ -100,7 +100,7 @@ public class ModuleManager {
 					while(ent.hasMoreElements()) {
 						String name = ent.nextElement().getName();
 						if(name.toLowerCase().endsWith(".class")) {
-							String clazz = name.replaceAll("/", ".").replaceAll(".class", "");
+							String clazz = name.replace("/", ".").replace(".class", "");
 							if(clazz.endsWith("Module")) {
 								launchClasses.add(clazz);
 							}

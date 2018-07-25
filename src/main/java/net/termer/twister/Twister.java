@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
+import net.termer.twister.handler.PreRequestHandler;
+import net.termer.twister.handler.PreRequestOptions;
 import net.termer.twister.handler.RequestHandler;
 import net.termer.twister.module.ModuleManager;
 import net.termer.twister.caching.CachingThread;
@@ -72,6 +74,9 @@ public class Twister {
 	
 	// Request handlers
 	private ArrayList<HashMap<String,HashMap<String,RequestHandler>>> requestHandlers = new ArrayList<HashMap<String,HashMap<String,RequestHandler>>>();
+	
+	// Pre-request handlers
+	private ArrayList<PreRequestHandler> preRequestHandlers = new ArrayList<PreRequestHandler>();
 	
 	// Handler to be executed before all requests
 	private RequestHandler beforeHandler = null;
@@ -169,7 +174,7 @@ public class Twister {
 				if(!path.startsWith("/")) path="/"+path;
 				if(!path.endsWith("/")) path+="/";
 				
-				if(StringFilter.same(req.pathInfo(), path)) {
+				if(StringFilter.same(path, path)) {
 					bad = true;
 					break;
 				}
@@ -217,6 +222,9 @@ public class Twister {
 		// Result
 		String r = "";
 		
+		// Store path
+		String path = req.pathInfo();
+		
 		// Determine domain
 		String domain = req.url();
 		if(domain.toLowerCase().startsWith("http://")) {
@@ -224,78 +232,93 @@ public class Twister {
 		} else if(domain.toLowerCase().startsWith("https://")) {
 			domain=domain.substring(8);
 		}
-		domain=domain.replaceAll(req.pathInfo(),"");
+		domain=domain.replace(path,"");
 		if(domain.contains(":")) {
 			domain=domain.split(":")[0];
 		}
 		domain=domain.toLowerCase();
 		
-		// Check if there is a redirect assigned for the requested path
-		boolean noRedirect = true;
-		if(domainRedirects.containsKey(domain)) {
-			HashMap<String,String> redirects = domainRedirects.get(domain);
-			if(redirects.containsKey("*")) {
-				noRedirect=false;
-				res.redirect(redirects.get("*"));
-			} else {
-				if(redirects.containsKey(req.pathInfo())) {
-					noRedirect=false;
-					res.redirect(redirects.get(req.pathInfo()));
-				} else if(redirects.containsKey(req.pathInfo()+'/')) {
-					noRedirect=false;
-					res.redirect(redirects.get(req.pathInfo()+'/'));
-				} else if(redirects.containsKey(req.pathInfo().substring(1))) {
-					noRedirect=false;
-					res.redirect(redirects.get(req.pathInfo().substring(1)));
-				}
-			}
+		// Execute pre-request handlers
+		PreRequestOptions preOptions = new PreRequestOptions(req, res, domain);
+		
+		for(PreRequestHandler handler : preRequestHandlers) {
+			handler.handle(preOptions);
 		}
 		
-		if(noRedirect) {
-			// Determine what to send
-			
-			// Determine URL with "/" added to the end of the path
-			String redirectURL = req.pathInfo()+"/";
-			if(req.queryMap().toMap().keySet().size()>0) {
-				redirectURL+="?";
-				for(String key : req.queryMap().toMap().keySet()) {
-					if(!redirectURL.endsWith("?")) {
-						redirectURL+="&";
+		// Set path and domain to values provided by the pre-request handlers
+		path = preOptions.getPath();
+		domain = preOptions.getDomain();
+		
+		// If the request was cancelled by a pre-request handler...
+		if(preOptions.isCancelled()) {
+			r = preOptions.getCancelText();
+		} else {
+			// Check if there is a redirect assigned for the requested path
+			boolean noRedirect = true;
+			if(domainRedirects.containsKey(domain)) {
+				HashMap<String,String> redirects = domainRedirects.get(domain);
+				if(redirects.containsKey("*")) {
+					noRedirect=false;
+					res.redirect(redirects.get("*"));
+				} else {
+					if(redirects.containsKey(path)) {
+						noRedirect=false;
+						res.redirect(redirects.get(path));
+					} else if(redirects.containsKey(path+'/')) {
+						noRedirect=false;
+						res.redirect(redirects.get(path+'/'));
+					} else if(redirects.containsKey(path.substring(1))) {
+						noRedirect=false;
+						res.redirect(redirects.get(path.substring(1)));
 					}
-					redirectURL+=key+"="+StringFilter.encodeURIComponent(req.queryParams(key));
 				}
 			}
 			
-			// Determine if there is a request handler available for domain and path
-			boolean handlerAvailable = false;
-			if(requestHandlers.get(method).containsKey(domain.toLowerCase())) {
-				String path = req.pathInfo();
-				if(!path.endsWith("/")) path=path+"/";
-				if(requestHandlers.get(method).get(domain.toLowerCase()).containsKey(path.toLowerCase())) {
-					handlerAvailable = true;
+			if(noRedirect) {
+				// Determine what to send
+				
+				// Determine URL with "/" added to the end of the path
+				String redirectURL = path+"/";
+				if(req.queryMap().toMap().keySet().size()>0) {
+					redirectURL+="?";
+					for(String key : req.queryMap().toMap().keySet()) {
+						if(!redirectURL.endsWith("?")) {
+							redirectURL+="&";
+						}
+						redirectURL+=key+"="+StringFilter.encodeURIComponent(req.queryParams(key));
+					}
 				}
-			}
-			if(new File("domains/"+domain+"/"+req.pathInfo()).isDirectory()) {
-				if(!req.pathInfo().endsWith("/")) {
-					res.redirect(redirectURL);
+				
+				// Determine if there is a request handler available for domain and path
+				boolean handlerAvailable = false;
+				if(requestHandlers.get(method).containsKey(domain.toLowerCase())) {
+					if(!path.endsWith("/")) path=path+"/";
+					if(requestHandlers.get(method).get(domain.toLowerCase()).containsKey(path.toLowerCase())) {
+						handlerAvailable = true;
+					}
+				}
+				if(new File("domains/"+domain+"/"+path).isDirectory()) {
+					if(!path.endsWith("/")) {
+						res.redirect(redirectURL);
+					} else {
+						// If handler available, use it instead of loading static
+						if(handlerAvailable) {
+							r = requestHandlers.get(method).get(domain.toLowerCase()).get(path.toLowerCase()).handle(req, res);
+						} else {
+							r = DocumentBuilder.loadDocument(domain, path, req, res);
+						}
+					}
 				} else {
 					// If handler available, use it instead of loading static
 					if(handlerAvailable) {
-						r = requestHandlers.get(method).get(domain.toLowerCase()).get(req.pathInfo().toLowerCase()).handle(req, res);
+						if(!path.endsWith("/")) {
+							res.redirect(redirectURL);
+						} else {
+							r = requestHandlers.get(method).get(domain.toLowerCase()).get(path.toLowerCase()).handle(req, res);
+						}
 					} else {
-						r = DocumentBuilder.loadDocument(domain, req.pathInfo(), req, res);
+						r = DocumentBuilder.loadDocument(domain, path, req, res);
 					}
-				}
-			} else {
-				// If handler available, use it instead of loading static
-				if(handlerAvailable) {
-					if(!req.pathInfo().endsWith("/")) {
-						res.redirect(redirectURL);
-					} else {
-						r = requestHandlers.get(method).get(domain.toLowerCase()).get(req.pathInfo().toLowerCase()).handle(req, res);
-					}
-				} else {
-					r = DocumentBuilder.loadDocument(domain, req.pathInfo(), req, res);
 				}
 			}
 		}

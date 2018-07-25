@@ -78,6 +78,6 @@ public class HTMLDocumentResponse implements TwisterDocumentResponse {
 	 * @since 0.2
 	 */
 	public void replace(String str, String replacement) {
-		setText(getText().replaceAll(str, replacement));
+		setText(getText().replace(str, replacement));
 	}
 }

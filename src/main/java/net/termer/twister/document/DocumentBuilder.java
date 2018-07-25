@@ -11,6 +11,7 @@ import spark.Response;
 import net.termer.twister.Settings;
 import net.termer.twister.Twister;
 import net.termer.twister.caching.TwisterCache;
+import net.termer.twister.utils.Domain;
 
 /**
  * Utility class to render webpages from file paths
@@ -62,7 +63,8 @@ public class DocumentBuilder {
 		if(Twister.linkedDomains.containsKey(domain)) {
 			domain = Twister.linkedDomains.get(domain);
 		}
-		if(new File("domains/"+domain+"/").exists()) {
+		Domain dom = new Domain(domain);
+		if(dom.exists()) {
 			if(path.startsWith("/")) {
 				path = path.substring(1);
 			}
@@ -86,32 +88,24 @@ public class DocumentBuilder {
 				path+="index.html";
 			}
 			if(document.exists()) {
-				if(Boolean.parseBoolean(Settings.get("caching"))) {
-					if(TwisterCache._TOPS_.containsKey(domain)) {
-						r=processTopDocument(path, TwisterCache._TOPS_.get(domain), domain, req, res);
-					}
-				} else {
-					File topFile = new File("domains/"+domain+"/top.html");
-					if(topFile.exists()) {
-						r=processTopDocument(path, readFile(topFile.getPath()), domain, req, res);
-					}
+				if(dom.hasTop()) {
+					r+=dom.getProcessedTop(req, res);
 				}
+				
 				r+=processDocument(path, readFile(document.getPath()), domain, req, res);
-				if(Boolean.parseBoolean(Settings.get("caching"))) {
-					if(TwisterCache._BOTTOMS_.containsKey(domain)) {
-						r+=processBottomDocument(path, TwisterCache._BOTTOMS_.get(domain), domain, req, res);
-					}
-				} else {
-					File bottomFile = new File("domains/"+domain+"/bottom.html");
-					if(bottomFile.exists()) {
-						r+=processBottomDocument(path, readFile(bottomFile.getPath()), domain, req, res);
-					}
+				
+				if(dom.hasBottom()) {
+					r+=dom.getProcessedBottom(req, res);
 				}
 			} else {
-				if(Boolean.parseBoolean(Settings.get("caching"))) {
-					r = TwisterCache._404_;
+				if(dom.has404()) {
+					r = dom.getProcessed404(req, res);
 				} else {
-					r = readFile("404.html");
+					if(Boolean.parseBoolean(Settings.get("caching"))) {
+						r = TwisterCache._404_;
+					} else {
+						r = readFile("404.html");
+					}
 				}
 				res.status(404);
 			}

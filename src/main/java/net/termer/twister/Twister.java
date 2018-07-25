@@ -78,9 +78,6 @@ public class Twister {
 	// Pre-request handlers
 	private ArrayList<PreRequestHandler> preRequestHandlers = new ArrayList<PreRequestHandler>();
 	
-	// Handler to be executed before all requests
-	private RequestHandler beforeHandler = null;
-	
 	// Default domain
 	private String defaultDomain = null;
 	
@@ -162,11 +159,6 @@ public class Twister {
 			if(Settings.get("logging").toLowerCase().startsWith("t")) {
 				String ln = new java.util.Date().toString()+": GET "+req.pathInfo()+" ("+req.ip()+" "+req.userAgent()+")";
 				System.out.println(ln);
-			}
-			
-			// Check for a before handler and execute if present
-			if(beforeHandler != null) {
-				beforeHandler.handle(req, res);
 			}
 			
 			boolean bad = false;
@@ -498,26 +490,28 @@ public class Twister {
 	 * @since 0.1
 	 */
 	public void addRequestHandler(String domain, String path, RequestHandler handler, int method) {
-		// Determine correct request handler map
-		
-		// If path does not end with "/", add it
-		if(!path.endsWith("/")) path+="/";
-		
-		// If path does not start with "/", add it
-		if(!path.startsWith("/")) path="/"+path;
-		
-		// If no domain exists in the handler map, create one
-		if(!requestHandlers.get(method).containsKey(domain.toLowerCase())) {
-			requestHandlers.get(method).put(domain.toLowerCase(), new HashMap<String,RequestHandler>());
+		if(handler != null && domain != null && path != null) {
+			// Determine correct request handler map
+			
+			// If path does not end with "/", add it
+			if(!path.endsWith("/")) path+="/";
+			
+			// If path does not start with "/", add it
+			if(!path.startsWith("/")) path="/"+path;
+			
+			// If no domain exists in the handler map, create one
+			if(!requestHandlers.get(method).containsKey(domain.toLowerCase())) {
+				requestHandlers.get(method).put(domain.toLowerCase(), new HashMap<String,RequestHandler>());
+			}
+			
+			// If handler for domain and path already exist, remove it
+			if(requestHandlers.get(method).get(domain.toLowerCase()).containsKey(path.toLowerCase())) {
+				requestHandlers.get(method).get(domain.toLowerCase()).remove(path.toLowerCase());
+			}
+			
+			// Add the handler
+			requestHandlers.get(method).get(domain.toLowerCase()).put(path.toLowerCase(), handler);
 		}
-		
-		// If handler for domain and path already exist, remove it
-		if(requestHandlers.get(method).get(domain.toLowerCase()).containsKey(path.toLowerCase())) {
-			requestHandlers.get(method).get(domain.toLowerCase()).remove(path.toLowerCase());
-		}
-		
-		// Add the handler
-		requestHandlers.get(method).get(domain.toLowerCase()).put(path.toLowerCase(), handler);
 	}
 	
 	/**
@@ -542,10 +536,12 @@ public class Twister {
 	 * @since 0.2
 	 */
 	public void addDocumentProcessor(String domain, DocumentProcessor processor) {
-		if(!DocumentBuilder._DOCUMENT_PROCESSORS_.containsKey(domain)) {
-			DocumentBuilder._DOCUMENT_PROCESSORS_.put(domain, new ArrayList<DocumentProcessor>());
+		if(processor != null && domain != null) {
+			if(!DocumentBuilder._DOCUMENT_PROCESSORS_.containsKey(domain)) {
+				DocumentBuilder._DOCUMENT_PROCESSORS_.put(domain, new ArrayList<DocumentProcessor>());
+			}
+			DocumentBuilder._DOCUMENT_PROCESSORS_.get(domain).add(processor);
 		}
-		DocumentBuilder._DOCUMENT_PROCESSORS_.get(domain).add(processor);
 	}
 	
 	/**
@@ -570,10 +566,12 @@ public class Twister {
 	 * @since 0.2
 	 */
 	public void addTopDocumentProcessor(String domain, DocumentProcessor processor) {
-		if(!DocumentBuilder._DOCUMENT_TOP_PROCESSORS_.containsKey(domain)) {
-			DocumentBuilder._DOCUMENT_TOP_PROCESSORS_.put(domain, new ArrayList<DocumentProcessor>());
+		if(processor != null && domain != null) {
+			if(!DocumentBuilder._DOCUMENT_TOP_PROCESSORS_.containsKey(domain)) {
+				DocumentBuilder._DOCUMENT_TOP_PROCESSORS_.put(domain, new ArrayList<DocumentProcessor>());
+			}
+			DocumentBuilder._DOCUMENT_TOP_PROCESSORS_.get(domain).add(processor);
 		}
-		DocumentBuilder._DOCUMENT_TOP_PROCESSORS_.get(domain).add(processor);
 	}
 	
 	/**
@@ -598,10 +596,12 @@ public class Twister {
 	 * @since 0.2
 	 */
 	public void addBottomDocumentProcessor(String domain, DocumentProcessor processor) {
-		if(!DocumentBuilder._DOCUMENT_BOTTOM_PROCESSORS_.containsKey(domain)) {
-			DocumentBuilder._DOCUMENT_BOTTOM_PROCESSORS_.put(domain, new ArrayList<DocumentProcessor>());
+		if(processor != null && domain != null) {
+			if(!DocumentBuilder._DOCUMENT_BOTTOM_PROCESSORS_.containsKey(domain)) {
+				DocumentBuilder._DOCUMENT_BOTTOM_PROCESSORS_.put(domain, new ArrayList<DocumentProcessor>());
+			}
+			DocumentBuilder._DOCUMENT_BOTTOM_PROCESSORS_.get(domain).add(processor);
 		}
-		DocumentBuilder._DOCUMENT_BOTTOM_PROCESSORS_.get(domain).add(processor);
 	}
 	
 	/**
@@ -620,21 +620,56 @@ public class Twister {
 	}
 	
 	/**
+	 * Method to register a PreRequestHandler
+	 * @param handler the handler to register
+	 * @since 0.3
+	 */
+	public void addPreRequestHandler(PreRequestHandler handler) {
+		if(handler != null) {
+			preRequestHandlers.add(handler);
+		}
+	}
+	
+	/**
+	 * Method to unregister a PreRequestHandler
+	 * @param handler the handler to unregister
+	 * @since 0.3
+	 */
+	public void removePreRequestHandler(PreRequestHandler handler) {
+		preRequestHandlers.remove(handler);
+	}
+	
+	/**
+	 * Returns all currently registered PreRequestHandlers
+	 * @return all currently registered PreRequestHandlers
+	 * @since 0.3
+	 */
+	public PreRequestHandler[] getPreRequestHandlers() {
+		return preRequestHandlers.toArray(new PreRequestHandler[0]);
+	}
+	
+	/**
 	 * Returns whether a before handler is present
 	 * @return whether a before handler is present
 	 * @since 0.1
+	 * @deprecated As of 0.3, the before request handler has been succeeded by pre-request handlers. This method now returns false.
 	 */
+	@Deprecated
 	public boolean isBeforeHandlerPresent() {
-		return beforeHandler!=null;
+		return false;
 	}
 	
 	/**
 	 * Returns the handler that gets executed before all requests
 	 * @return the handler that gets executed before all requests
 	 * @since 0.1
+	 * @deprecated As of 0.3, the before request handler has been succeeded by pre-request handlers. This method now returns a request handler that returns an empty String.
 	 */
+	@Deprecated
 	public RequestHandler getBeforeRequestHandler() {
-		return beforeHandler;
+		return (req, res) -> {
+			return "";
+		};
 	}
 	
 	/**
@@ -642,18 +677,18 @@ public class Twister {
 	 * Setting to null will clear the handler
 	 * @param handler the handler to execute before all requests
 	 * @since 0.1
+	 * @deprecated As of 0.3 the before request handler has been succeeded by pre-request handlers. This method now does nothing.
 	 */
-	public void setBeforeRequestHandler(RequestHandler handler) {
-		beforeHandler = handler;
-	}
+	@Deprecated
+	public void setBeforeRequestHandler(RequestHandler handler) {}
 	
 	/**
 	 * Clears the before request handler
 	 * @since 0.1
+	 * @deprecated As of 0.3 the before request handler has been succeeded by pre-request handlers. This method now does nothing.
 	 */
-	public void clearBeforeRequestHandler() {
-		beforeHandler = null;
-	}
+	@Deprecated
+	public void clearBeforeRequestHandler() {}
 	
 	/**
 	 * Returns the default domain to be used by modules

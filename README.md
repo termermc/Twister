@@ -29,7 +29,7 @@ It include the following:
 ```
 
 # How do I use it?
-To use Twister, simply execute the jarfile in the terminal, and all the necesary files and directory.
+To use Twister, simply execute the jarfile in the terminal, and all the necessary files and directories will be generated.
 
 Once the server has started, stop it and begin the **configuration** guide.
 
@@ -50,13 +50,13 @@ twister.ini - the main configuration file
 This is a directory that is used for placing modules in.
 
 **dependencies/**
-This is a directory where you place jars that modules depend on, so that they can be loaded into the server.
+This is a directory where you place jars that modules depend on, so that they can be loaded by the server.
 
 **globalstatic/**
 The directory that houses all static files. Any files there can be access via get requests. If a user were to visit /image.png, the server would fetch globalstatic/image.png and serve it up. The location of "globalstatic" can be changed in **twister.ini**.
 
 **domains/**
-The core domain file system structure. It contains directories for domains, and in the domain directories are where static pages are to be placed. If you want to serve pages from the domain "localhost" you would create a directory called "localhost" inside of "domains/". Inside of that, you would place a file, such as "index.html" which would be served when a user visits "localhost". To have a webpage rendered on top of each page, create a file called "top.html" in the specific domain directory, and do the same but change it to "bottom.html" for bottom. Example of directory structure: ![example directory structure](https://termer.net/twist_structure.png)
+The core domain file system structure. It contains directories for domains, and in the domain directories are where static pages are to be placed. If you want to serve pages from the domain "localhost" you would create a directory called "localhost" inside of "domains/". Inside of that, you would place a file, such as "index.html" which would be served when a user visits "localhost". To have a webpage rendered on top of each page, create a file called "top.html" in the specific domain directory, and do the same but change it to "bottom.html" for bottom. To set a custom 404 page for the domain, simply create a "404.html" file in the domain root. Example of directory structure: ![example directory structure](https://termer.net/twist_structure.png)
 
 **404.html**
 The webpage to be rendered when a file or RequestHandler for a page is not found.
@@ -84,8 +84,11 @@ Domain redirect files are useful for link shortening, as well as fixing links th
  ```
 
 # How do I build it?
-To build Twister, you must include Zip4J (http://www.lingala.net/zip4j/) and SparkJava (https://github.com/perwendel/spark) in the build path, and then build as a runnable jar.
+To build Twister, you must include [Zip4J](http://www.lingala.net/zip4j/) and [SparkJava](https://github.com/perwendel/spark) in the classpath, and then build as a runnable jar.
+
 NOTE: It is recommended that you use maven to include Spark, as it will automatically download spark dependencies.
+
+NOTE: To build the current indev version (0.3) you will need to include [UniversalDB](https://github.com/TermerMC/UniversalDB) in the classpath, as well as all the other libraries listed above.
 
 # How do I create a module?
 An example module can be found at https://github.com/termermc/ExampleTwisterModule with instructions on how to build and API examples.
@@ -93,7 +96,7 @@ An example module can be found at https://github.com/termermc/ExampleTwisterModu
 # Where can I find the Javadoc?
 Here: https://termer.net/javadocs/twister/
 
-Click the version you want, and you will be presented the javadoc
+Click the version you want, and you will be presented with the Javadoc.
 
 # Current development version
 The current version being developed is version **0.3**, and additionally requires the [UniversalDB](https://github.com/TermerMC/UniversalDB) library to compile. In 0.3, routes, individual 404 pages for domains, and pre-request handlers are being added.
@@ -102,4 +105,4 @@ Checklist:
   - **TODO** Routes
   - **TODO** Individual 404 pages for domains
   - **DONE** Inclusion of the UniversalDB library
-  - **TODO** PreRequestHandlers to handle requests before they are sent to the request processor
+  - **DONE** PreRequestHandlers to handle requests before they are sent to the request processor

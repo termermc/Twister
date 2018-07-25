@@ -25,8 +25,15 @@ public class TwisterCache {
 	public static HashMap<String,String> _BOTTOMS_ = new HashMap<String,String>();
 	
 	/**
-	 * Cached 404 message.
+	 * Cached main 404 page.
 	 * @since 0.2
 	 */
 	public static String _404_ = "";
+	
+	/**
+	 * Cached 404 pages for domains.
+	 * Key: Domain
+	 * Value: Cached 404 page
+	 */
+	public static HashMap<String,String> _404S_ = new HashMap<String,String>();
 }

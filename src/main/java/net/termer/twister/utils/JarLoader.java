@@ -45,7 +45,7 @@ public class JarLoader {
 				while(ent.hasMoreElements()) {
 					String name = ent.nextElement().getName();
 					if(name.toLowerCase().endsWith(".class")) {
-						classes.add(name.replaceAll("/", ".").replaceAll(".class", ""));
+						classes.add(name.replace("/", ".").replace(".class", ""));
 					}
 				}
 				jf.close();

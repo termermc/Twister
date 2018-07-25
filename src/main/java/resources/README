@@ -6,7 +6,7 @@ passed to the request processor.
 
 Changes in this release:
   - Added routing (TODO)
-  - Added individual 404 pages for domains (TODO)
+  - Added individual 404 pages for domains
   - Added UniversalDB library for database SQL database interaction
   - PreRequestHandlers for manipulating requests before they get passed
     to the request processor

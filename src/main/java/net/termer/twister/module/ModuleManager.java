@@ -116,11 +116,11 @@ public class ModuleManager {
 		URLClassLoader ucl = new URLClassLoader(urls.toArray(new URL[0]));
 		for(String clazz : classes) {
 			try {
-				Class cls = ucl.loadClass(clazz);
+				Class<?> cls = ucl.loadClass(clazz);
 				
 				for(String launchClass : launchClasses) {
 					if(StringFilter.same(launchClass, clazz)) {
-						for(Class inter : cls.getInterfaces()) {
+						for(Class<?> inter : cls.getInterfaces()) {
 							if(StringFilter.same(inter.getTypeName(),"net.termer.twister.module.TwisterModule")) {
 								_MODULES_.add((TwisterModule) cls.newInstance());
 								break;

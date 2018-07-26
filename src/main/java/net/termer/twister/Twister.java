@@ -35,7 +35,7 @@ public class Twister {
 	 * Twister version
 	 * @since 0.1
 	 */
-	public static double _VERSION_ = 0.2;
+	public static double _VERSION_ = 0.3;
 	
 	/**
 	 * Shared variables for using across modules

@@ -61,7 +61,6 @@ public class ModuleManager {
 	 * @throws IOException if closing the ClassLoader fails
 	 * @since 0.1
 	 */
-	@SuppressWarnings({ "rawtypes", "deprecation" })
 	public static void loadModules() throws ZipException, IOException {
 		Twister.current().logInfo("Loading modules...");
 		

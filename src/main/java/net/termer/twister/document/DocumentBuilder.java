@@ -99,7 +99,15 @@ public class DocumentBuilder {
 				}
 			} else {
 				if(dom.has404()) {
-					r = dom.getProcessed404(req, res);
+					if(dom.hasTop()) {
+						r+=dom.getProcessedTop(req, res);
+					}
+					
+					r+=dom.getProcessed404(req, res);
+					
+					if(dom.hasBottom()) {
+						r+=dom.getProcessedBottom(req, res);
+					}
 				} else {
 					if(Boolean.parseBoolean(Settings.get("caching"))) {
 						r = TwisterCache._404_;

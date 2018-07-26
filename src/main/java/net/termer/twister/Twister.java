@@ -69,16 +69,12 @@ public class Twister {
 	 */
 	public static ArrayList<String> forbiddenPaths = new ArrayList<String>();
 	
-	// The current instance of Twister
 	protected static Twister twister = null;
 	
-	// Request handlers
 	private ArrayList<HashMap<String,HashMap<String,RequestHandler>>> requestHandlers = new ArrayList<HashMap<String,HashMap<String,RequestHandler>>>();
 	
-	// Pre-request handlers
 	private ArrayList<PreRequestHandler> preRequestHandlers = new ArrayList<PreRequestHandler>();
 	
-	// Default domain
 	private String defaultDomain = null;
 	
 	// Configuration files
@@ -91,7 +87,6 @@ public class Twister {
 	private File forbiddenPathsFile = new File("forbiddenpaths.ini");
 	private File dependenciesDirectory = new File("dependencies/");
 	
-	// Caching thread
 	private CachingThread cachingThread = null;
 	
 	/**

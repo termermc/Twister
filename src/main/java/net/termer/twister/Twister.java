@@ -130,13 +130,10 @@ public class Twister {
 		// Setup files and directories
 		reloadConfigurations();
 		
-		// Set global static files location
 		staticFiles.externalLocation(globalstaticFile.getAbsolutePath());
 		
-		// Set port to run on
 		port(Integer.parseInt(Settings.get("port")));
 		
-		// Set IP address to bind to
 		ipAddress(Settings.get("ip"));
 		
 		// Enable HTTPS if keystore is available

@@ -60,71 +60,71 @@ public class DocumentBuilder {
 	public static String loadDocument(String domain, String path, Request req, Response res) throws IOException {
 		String r = "";
 		try {
-		if(Twister.linkedDomains.containsKey(domain)) {
-			domain = Twister.linkedDomains.get(domain);
+			if(Twister.linkedDomains.containsKey(domain)) {
+				domain = Twister.linkedDomains.get(domain);
 		}
-		Domain dom = new Domain(domain);
-		if(dom.exists()) {
-			if(path.startsWith("/")) {
-				path = path.substring(1);
-			}
-			if(path.length()<1) {
-				path="index.html";
-			}
-			if(path.endsWith("/")) {
-				path+="index.html";
-			}
-			if(new File("domains/"+domain+"/"+path).isDirectory()) {
-				if(!path.endsWith("/")) {
-					path+='/';
+			Domain dom = new Domain(domain);
+			if(dom.exists()) {
+				if(path.startsWith("/")) {
+					path = path.substring(1);
 				}
-				path+="index.html";
-			}
-			File document = new File("domains/"+domain+"/"+path);
-			if(document.isDirectory()) {
-				if(!path.endsWith("/")) {
-					path+='/';
+				if(path.length()<1) {
+					path="index.html";
 				}
-				path+="index.html";
-			}
-			if(document.exists()) {
-				if(dom.hasTop()) {
-					r+=dom.getProcessedTop(req, res);
+				if(path.endsWith("/")) {
+					path+="index.html";
 				}
-				
-				r+=processDocument(path, readFile(document.getPath()), domain, req, res);
-				
-				if(dom.hasBottom()) {
-					r+=dom.getProcessedBottom(req, res);
+				if(new File("domains/"+domain+"/"+path).isDirectory()) {
+					if(!path.endsWith("/")) {
+						path+='/';
+					}
+					path+="index.html";
 				}
-			} else {
-				if(dom.has404()) {
+				File document = new File("domains/"+domain+"/"+path);
+				if(document.isDirectory()) {
+					if(!path.endsWith("/")) {
+						path+='/';
+					}
+					path+="index.html";
+				}
+				if(document.exists()) {
 					if(dom.hasTop()) {
 						r+=dom.getProcessedTop(req, res);
 					}
 					
-					r+=dom.getProcessed404(req, res);
+					r+=processDocument(path, readFile(document.getPath()), domain, req, res);
 					
 					if(dom.hasBottom()) {
 						r+=dom.getProcessedBottom(req, res);
 					}
 				} else {
-					if(Boolean.parseBoolean(Settings.get("caching"))) {
-						r = TwisterCache._404_;
+					if(dom.has404()) {
+						if(dom.hasTop()) {
+							r+=dom.getProcessedTop(req, res);
+						}
+						
+						r+=dom.getProcessed404(req, res);
+						
+						if(dom.hasBottom()) {
+							r+=dom.getProcessedBottom(req, res);
+						}
 					} else {
-						r = readFile("404.html");
+						if(Boolean.parseBoolean(Settings.get("caching"))) {
+							r = TwisterCache._404_;
+						} else {
+							r = readFile("404.html");
+						}
 					}
+					res.status(404);
+				}
+			} else {
+				if(Boolean.parseBoolean(Settings.get("caching"))) {
+					r = TwisterCache._404_;
+				} else {
+					r = readFile("404.html");
 				}
 				res.status(404);
 			}
-		} else {
-			if(Boolean.parseBoolean(Settings.get("caching"))) {
-				r = TwisterCache._404_;
-			} else {
-				r = readFile("404.html");
-			}
-			res.status(404);
-		}
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -139,13 +139,13 @@ public class DocumentBuilder {
 	 * @since 0.1
 	 */
 	public static String readFile(String path) throws IOException {
-		String r = "";
+		StringBuilder sb = new StringBuilder();
 		FileInputStream fin = new FileInputStream(new File(path));
 		while(fin.available()>0) {
-			r+=(char)fin.read();
+			sb.append((char)fin.read());
 		}
 		fin.close();
-		return r;
+		return sb.toString();
 	}
 	
 	

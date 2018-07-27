@@ -176,12 +176,14 @@ public class Config {
 	public static ArrayList<String> getLines(File configFile, String comment) throws IOException {
 		ArrayList<String> lines = new ArrayList<String>();
 		
-		String tmp = "";
+		StringBuilder sb = new StringBuilder();
 		FileInputStream fin = new FileInputStream(configFile);
 		while(fin.available()>0) {
-			tmp+=(char)fin.read();
+			sb.append((char)fin.read());
 		}
 		fin.close();
+		
+		String tmp = sb.toString();
 		
 		if(tmp.contains("\n")) {
 			for(String str : tmp.split("\n")) {

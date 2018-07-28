@@ -2,6 +2,7 @@ package net.termer.twister.utils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -117,5 +118,108 @@ public class StringFilter {
 	    }
 
 	    return result;
+	}
+	
+	/**
+	 * Replaces all regular expression characters with their escaped versions
+	 * @param regexString the String to escape
+	 * @return the String with the escaped regex characters
+	 * @since 0.3
+	 */
+	public static String escapeRegexCharacters(String regexString) {
+		return regexString
+				.replace("<", "\\<")
+				.replace("(", "\\(")
+				.replace("[", "\\[")
+				.replace("{", "\\{")
+				.replace("\\", "\\\\")
+				.replace("^", "\\^")
+				.replace("-", "\\-")
+				.replace("=", "\\=")
+				.replace("$", "\\$")
+				.replace("!", "\\!")
+				.replace("|", "\\|")
+				.replace("]", "\\]")
+				.replace("}", "\\}")
+				.replace(")", "\\)")
+				.replace("?", "\\?")
+				.replace("*", "\\*")
+				.replace("+", "\\+")
+				.replace(".", "\\.")
+				.replace(">", "\\>");
+	}
+	
+	/**
+	 * Removes all regular expression characters from the provided String
+	 * @param regexString the String to process
+	 * @return the String minus all regex characters
+	 * @since 0.3
+	 */
+	public static String removeRegexCharacters(String regexString) {
+		return regexString
+				.replace("<", "")
+				.replace("(", "")
+				.replace("[", "")
+				.replace("{", "")
+				.replace("\\", "")
+				.replace("^", "")
+				.replace("-", "")
+				.replace("=", "")
+				.replace("$", "")
+				.replace("!", "")
+				.replace("|", "")
+				.replace("]", "")
+				.replace("}", "")
+				.replace(")", "")
+				.replace("?", "")
+				.replace("*", "")
+				.replace("+", "")
+				.replace(".", "")
+				.replace(">", "");
+	}
+	
+	/**
+	 * Returns whether the specified path matches the specified route, using * as wildcards
+	 * @param route the route
+	 * @param path the path to check
+	 * @return whether the path matches the route
+	 * @since 0.3
+	 */
+	public static boolean matchesRoute(String route, String path) {
+		String escRoute = removeRegexCharacters(route.replace("*", "\n")).replace("\n", "\\w*");
+		String escPath = removeRegexCharacters(path);
+		return escPath.matches(escRoute);
+	}
+	
+	/**
+	 * Takes in the provided path and gets all of its filled in wildcard spaces from the route.
+	 * Example:
+	 * If the route is "/hello/[asterisk]/"
+	 * and your path is "/hello/world/"
+	 * then the method will return an array with "world".
+	 * @param route the route to check the path against
+	 * @param path the path to be checked
+	 * @return all the filled in asterisk spaces
+	 * @since 0.3
+	 */
+	public static String[] processRoute(String route, String path) {
+		ArrayList<String> wildcards = new ArrayList<String>();
+		
+		String[] parts = route.replace("*", "\n").split("\n");
+		for(int i = 0; i < parts.length; i++) {
+			if(!same(parts[i], path.charAt(path.length()-1)+"")) {
+				String tmp = path.substring(path.indexOf(parts[i])+parts[i].length());
+				if(parts.length >= i+2) {
+					if(same(parts[i+1], path.charAt(path.length()-1)+"")) {
+						tmp = tmp.substring(0, tmp.length()-1);
+					} else {
+						tmp = tmp.substring(0, path.indexOf(parts[i+1])-parts[i].length());
+					}
+				}
+				wildcards.add(tmp);
+			}
+;		}
+		
+		return wildcards.toArray(new String[0]);
 	}
 }

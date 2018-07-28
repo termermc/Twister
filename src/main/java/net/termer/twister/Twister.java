@@ -560,8 +560,8 @@ public class Twister {
 			if(!route.startsWith("/")) route="/"+route;
 			
 			// If no domain exists in the handler map, create one
-			if(!requestHandlers.get(method).containsKey(domain.toLowerCase())) {
-				requestHandlers.get(method).put(domain.toLowerCase(), new HashMap<String,RequestHandler>());
+			if(!routeHandlers.get(method).containsKey(domain.toLowerCase())) {
+				routeHandlers.get(method).put(domain.toLowerCase(), new HashMap<String,RouteHandler>());
 			}
 			
 			// Add the handler

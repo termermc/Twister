@@ -218,7 +218,7 @@ public class StringFilter {
 				}
 				wildcards.add(tmp);
 			}
-;		}
+		}
 		
 		return wildcards.toArray(new String[0]);
 	}

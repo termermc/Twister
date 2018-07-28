@@ -13,6 +13,7 @@ import java.util.HashMap;
 import net.termer.twister.handler.PreRequestHandler;
 import net.termer.twister.handler.PreRequestOptions;
 import net.termer.twister.handler.RequestHandler;
+import net.termer.twister.handler.RouteHandler;
 import net.termer.twister.module.ModuleManager;
 import net.termer.twister.caching.CachingThread;
 import net.termer.twister.document.DocumentBuilder;
@@ -72,8 +73,8 @@ public class Twister {
 	protected static Twister twister = null;
 	
 	private ArrayList<HashMap<String,HashMap<String,RequestHandler>>> requestHandlers = new ArrayList<HashMap<String,HashMap<String,RequestHandler>>>();
-	
 	private ArrayList<PreRequestHandler> preRequestHandlers = new ArrayList<PreRequestHandler>();
+	private ArrayList<HashMap<String,HashMap<String,RouteHandler>>> routeHandlers = new ArrayList<HashMap<String,HashMap<String,RouteHandler>>>();
 	
 	private String defaultDomain = null;
 	
@@ -273,36 +274,57 @@ public class Twister {
 					}
 				}
 				
-				// Determine if there is a request handler available for domain and path
-				boolean handlerAvailable = false;
-				if(requestHandlers.get(method).containsKey(domain.toLowerCase())) {
-					if(!path.endsWith("/")) path=path+"/";
-					if(requestHandlers.get(method).get(domain.toLowerCase()).containsKey(path.toLowerCase())) {
-						handlerAvailable = true;
+				// Determine if there is a route handler available for the domain
+				RouteHandler routeHandler = null;
+				String route = null;
+				
+				if(routeHandlers.get(method).containsKey(domain.toLowerCase())) {
+					String[] routes = routeHandlers.get(method).get(domain.toLowerCase()).keySet().toArray(new String[0]);
+					RouteHandler[] handlers = routeHandlers.get(method).get(domain.toLowerCase()).values().toArray(new RouteHandler[0]);
+					for(int i = 0; i < routes.length; i++) {
+						if(StringFilter.matchesRoute(routes[i], path)) {
+							routeHandler = handlers[i];
+							route = routes[i];
+						}
 					}
 				}
-				if(new File("domains/"+domain+"/"+path).isDirectory()) {
-					if(!path.endsWith("/")) {
-						res.redirect(redirectURL);
+				
+					
+				if(routeHandler == null) {
+					// Determine if there is a request handler available for domain and path
+					boolean handlerAvailable = false;
+					if(requestHandlers.get(method).containsKey(domain.toLowerCase())) {
+						if(!path.endsWith("/")) path=path+"/";
+						if(requestHandlers.get(method).get(domain.toLowerCase()).containsKey(path.toLowerCase())) {
+							handlerAvailable = true;
+						}
+					}
+					if(new File("domains/"+domain+"/"+path).isDirectory()) {
+						if(!path.endsWith("/")) {
+							res.redirect(redirectURL);
+						} else {
+							// If handler available, use it instead of loading static
+							if(handlerAvailable) {
+								r = requestHandlers.get(method).get(domain.toLowerCase()).get(path.toLowerCase()).handle(req, res);
+							} else {
+								r = DocumentBuilder.loadDocument(domain, path, req, res);
+							}
+						}
 					} else {
 						// If handler available, use it instead of loading static
 						if(handlerAvailable) {
-							r = requestHandlers.get(method).get(domain.toLowerCase()).get(path.toLowerCase()).handle(req, res);
+							if(!path.endsWith("/")) {
+								res.redirect(redirectURL);
+							} else {
+								r = requestHandlers.get(method).get(domain.toLowerCase()).get(path.toLowerCase()).handle(req, res);
+							}
 						} else {
 							r = DocumentBuilder.loadDocument(domain, path, req, res);
 						}
 					}
 				} else {
-					// If handler available, use it instead of loading static
-					if(handlerAvailable) {
-						if(!path.endsWith("/")) {
-							res.redirect(redirectURL);
-						} else {
-							r = requestHandlers.get(method).get(domain.toLowerCase()).get(path.toLowerCase()).handle(req, res);
-						}
-					} else {
-						r = DocumentBuilder.loadDocument(domain, path, req, res);
-					}
+					// Get wildcards for route, then execute the route handler
+					r = routeHandler.handle(StringFilter.processRoute(route, path));
 				}
 			}
 		}
@@ -496,11 +518,6 @@ public class Twister {
 				requestHandlers.get(method).put(domain.toLowerCase(), new HashMap<String,RequestHandler>());
 			}
 			
-			// If handler for domain and path already exist, remove it
-			if(requestHandlers.get(method).get(domain.toLowerCase()).containsKey(path.toLowerCase())) {
-				requestHandlers.get(method).get(domain.toLowerCase()).remove(path.toLowerCase());
-			}
-			
 			// Add the handler
 			requestHandlers.get(method).get(domain.toLowerCase()).put(path.toLowerCase(), handler);
 		}
@@ -518,6 +535,46 @@ public class Twister {
 			requestHandlers.get(method).get(domain.toLowerCase()).remove(path.toLowerCase());
 		} else {
 			logError("No RequestHandlers for domain \""+domain.toLowerCase()+"\"");
+		}
+	}
+	
+	/**
+	 * Method to register route handlers
+	 * @param domain - the domain to register the handler for
+	 * @param route - the route to register the handler for
+	 * @param handler - the handler
+	 * @param method - the HTTP method (Method.GET/POST/DELETE/PUT)
+	 * @since 0.3
+	 */
+	public void addRouteHandler(String domain, String route, RouteHandler handler, int method) {
+		if(handler != null && domain != null && route != null) {
+			// Determine correct request handler map
+			
+			// If path does not start with "/", add it
+			if(!route.startsWith("/")) route="/"+route;
+			
+			// If no domain exists in the handler map, create one
+			if(!requestHandlers.get(method).containsKey(domain.toLowerCase())) {
+				requestHandlers.get(method).put(domain.toLowerCase(), new HashMap<String,RequestHandler>());
+			}
+			
+			// Add the handler
+			routeHandlers.get(method).get(domain.toLowerCase()).put(route.toLowerCase(), handler);
+		}
+	}
+	
+	/**
+	 * Method to unregister a route handler
+	 * @param domain - the domain to unregister the handler from
+	 * @param route - the route to unregister the handler from
+	 * @param method - the HTTP method (Method.GET/POST/DELETE) to unregister the handler from
+	 * @since 0.3
+	 */
+	public void removeRouteHandler(String domain, String route, int method) {
+		if(routeHandlers.get(method).containsKey(domain.toLowerCase())) {
+			routeHandlers.get(method).get(domain.toLowerCase()).remove(route.toLowerCase());
+		} else {
+			logError("No RouteHandlers for domain \""+domain.toLowerCase()+"\"");
 		}
 	}
 	

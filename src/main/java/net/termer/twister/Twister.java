@@ -111,6 +111,12 @@ public class Twister {
 		requestHandlers.add(new HashMap<String,HashMap<String,RequestHandler>>()); // DELETE
 		requestHandlers.add(new HashMap<String,HashMap<String,RequestHandler>>()); // PUT
 		
+		// Setup route handler maps
+		routeHandlers.add(new HashMap<String,HashMap<String,RouteHandler>>()); // GET
+		routeHandlers.add(new HashMap<String,HashMap<String,RouteHandler>>()); // POST
+		routeHandlers.add(new HashMap<String,HashMap<String,RouteHandler>>()); // DELETE
+		routeHandlers.add(new HashMap<String,HashMap<String,RouteHandler>>()); // PUT
+		
 		// Extract README
 		try {
 			InputStream readmeInput = getClass().getResource("/resources/README").openStream();

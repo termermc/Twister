@@ -5,12 +5,13 @@ several SQL databases, and PreRequestHandlers for manipulating requests before t
 passed to the request processor.
 
 Changes in this release:
-  - Added routing (TODO)
+  - Added routing
   - Added individual 404 pages for domains
   - Added UniversalDB library for database SQL database interaction
   - PreRequestHandlers for manipulating requests before they get passed
     to the request processor
   - Disabled and deprecated all BeforeHandler methods
+  - Properly send image and file types other than HTML in domains
 
 
 === Version 0.2 ===

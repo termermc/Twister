@@ -102,7 +102,8 @@ Click the version you want, and you will be presented with the Javadoc.
 The current version being developed is version **0.3**, and additionally requires the [UniversalDB](https://github.com/TermerMC/UniversalDB) library to compile. In 0.3, routes, individual 404 pages for domains, and pre-request handlers are being added.
 
 Checklist:
-  - **TODO** Routes
+  - **DONE** Routes
   - **DONE** Individual 404 pages for domains
   - **DONE** Inclusion of the UniversalDB library
   - **DONE** PreRequestHandlers to handle requests before they are sent to the request processor
+  - **TODO** Send non-HTML files properly in domains

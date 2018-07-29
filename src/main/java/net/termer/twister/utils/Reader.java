@@ -1,6 +1,8 @@
 package net.termer.twister.utils;
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -19,13 +21,20 @@ public class Reader {
 	 * @since 0.3
 	 */
 	public static String readFile(String path) throws IOException {
-		StringBuilder sb = new StringBuilder();
-		FileInputStream fin = new FileInputStream(path);
-		while(fin.available()>0) {
-			sb.append((char)fin.read());
+		StringBuilder fileData = new StringBuilder(1000);//Constructs a string buffer with no characters in it and the specified initial capacity
+		BufferedReader reader = new BufferedReader(new FileReader(path));
+		
+		char[] buf = new char[1024];
+		int numRead = 0;
+		while ((numRead = reader.read(buf)) != -1) {
+			String readData = String.valueOf(buf, 0, numRead);
+			fileData.append(readData);
+			buf = new char[1024];
 		}
-		fin.close();
-		return sb.toString();
+		
+		reader.close();
+ 
+		return fileData.toString();
 	}
 	
 	/**

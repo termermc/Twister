@@ -300,8 +300,9 @@ public class Twister {
 					// Determine if there is a request handler available for domain and path
 					boolean handlerAvailable = false;
 					if(requestHandlers.get(method).containsKey(domain.toLowerCase())) {
-						if(!path.endsWith("/")) path=path+"/";
 						if(requestHandlers.get(method).get(domain.toLowerCase()).containsKey(path.toLowerCase())) {
+							handlerAvailable = true;
+						} else if(requestHandlers.get(method).get(domain.toLowerCase()).containsKey(path.toLowerCase()+"/")) {
 							handlerAvailable = true;
 						}
 					}
@@ -313,6 +314,7 @@ public class Twister {
 							if(handlerAvailable) {
 								r = requestHandlers.get(method).get(domain.toLowerCase()).get(path.toLowerCase()).handle(req, res);
 							} else {
+								System.out.println("yeet"+path);
 								r = DocumentBuilder.loadDocument(domain, path, req, res);
 							}
 						}

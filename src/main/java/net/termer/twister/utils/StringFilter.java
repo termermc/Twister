@@ -124,7 +124,7 @@ public class StringFilter {
 	 * Replaces all regular expression characters with their escaped versions
 	 * @param regexString the String to escape
 	 * @return the String with the escaped regex characters
-	 * @since 0.3
+	 * @since 1.0
 	 */
 	public static String escapeRegexCharacters(String regexString) {
 		return regexString
@@ -153,7 +153,7 @@ public class StringFilter {
 	 * Removes all regular expression characters from the provided String
 	 * @param regexString the String to process
 	 * @return the String minus all regex characters
-	 * @since 0.3
+	 * @since 1.0
 	 */
 	public static String removeRegexCharacters(String regexString) {
 		return regexString
@@ -183,7 +183,7 @@ public class StringFilter {
 	 * @param route the route
 	 * @param path the path to check
 	 * @return whether the path matches the route
-	 * @since 0.3
+	 * @since 1.0
 	 */
 	public static boolean matchesRoute(String route, String path) {
 		String escRoute = removeRegexCharacters(route.replace("*", "\n")).replace("\n", "\\w*");
@@ -200,7 +200,7 @@ public class StringFilter {
 	 * @param route the route to check the path against
 	 * @param path the path to be checked
 	 * @return all the filled in asterisk spaces
-	 * @since 0.3
+	 * @since 1.0
 	 */
 	public static String[] processRoute(String route, String path) {
 		ArrayList<String> wildcards = new ArrayList<String>();

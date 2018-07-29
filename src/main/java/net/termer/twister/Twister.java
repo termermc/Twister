@@ -36,7 +36,7 @@ public class Twister {
 	 * Twister version
 	 * @since 0.1
 	 */
-	public static double _VERSION_ = 0.3;
+	public static double _VERSION_ = 1.0;
 	
 	/**
 	 * Shared variables for using across modules
@@ -552,7 +552,7 @@ public class Twister {
 	 * @param route - the route to register the handler for
 	 * @param handler - the handler
 	 * @param method - the HTTP method (Method.GET/POST/DELETE/PUT)
-	 * @since 0.3
+	 * @since 1.0
 	 */
 	public void addRouteHandler(String domain, String route, RouteHandler handler, int method) {
 		if(handler != null && domain != null && route != null) {
@@ -576,7 +576,7 @@ public class Twister {
 	 * @param domain - the domain to unregister the handler from
 	 * @param route - the route to unregister the handler from
 	 * @param method - the HTTP method (Method.GET/POST/DELETE) to unregister the handler from
-	 * @since 0.3
+	 * @since 1.0
 	 */
 	public void removeRouteHandler(String domain, String route, int method) {
 		if(routeHandlers.get(method).containsKey(domain.toLowerCase())) {
@@ -679,7 +679,7 @@ public class Twister {
 	/**
 	 * Method to register a PreRequestHandler
 	 * @param handler the handler to register
-	 * @since 0.3
+	 * @since 1.0
 	 */
 	public void addPreRequestHandler(PreRequestHandler handler) {
 		if(handler != null) {
@@ -690,7 +690,7 @@ public class Twister {
 	/**
 	 * Method to unregister a PreRequestHandler
 	 * @param handler the handler to unregister
-	 * @since 0.3
+	 * @since 1.0
 	 */
 	public void removePreRequestHandler(PreRequestHandler handler) {
 		preRequestHandlers.remove(handler);
@@ -699,7 +699,7 @@ public class Twister {
 	/**
 	 * Returns all currently registered PreRequestHandlers
 	 * @return all currently registered PreRequestHandlers
-	 * @since 0.3
+	 * @since 1.0
 	 */
 	public PreRequestHandler[] getPreRequestHandlers() {
 		return preRequestHandlers.toArray(new PreRequestHandler[0]);
@@ -709,7 +709,7 @@ public class Twister {
 	 * Returns whether a before handler is present
 	 * @return whether a before handler is present
 	 * @since 0.1
-	 * @deprecated As of 0.3, the before request handler has been succeeded by pre-request handlers. This method now returns false.
+	 * @deprecated As of 1.0, the before request handler has been succeeded by pre-request handlers. This method now returns false.
 	 */
 	@Deprecated
 	public boolean isBeforeHandlerPresent() {
@@ -720,7 +720,7 @@ public class Twister {
 	 * Returns the handler that gets executed before all requests
 	 * @return the handler that gets executed before all requests
 	 * @since 0.1
-	 * @deprecated As of 0.3, the before request handler has been succeeded by pre-request handlers. This method now returns a request handler that returns an empty String.
+	 * @deprecated As of 1.0, the before request handler has been succeeded by pre-request handlers. This method now returns a request handler that returns an empty String.
 	 */
 	@Deprecated
 	public RequestHandler getBeforeRequestHandler() {
@@ -734,7 +734,7 @@ public class Twister {
 	 * Setting to null will clear the handler
 	 * @param handler the handler to execute before all requests
 	 * @since 0.1
-	 * @deprecated As of 0.3 the before request handler has been succeeded by pre-request handlers. This method now does nothing.
+	 * @deprecated As of 1.0 the before request handler has been succeeded by pre-request handlers. This method now does nothing.
 	 */
 	@Deprecated
 	public void setBeforeRequestHandler(RequestHandler handler) {}
@@ -742,7 +742,7 @@ public class Twister {
 	/**
 	 * Clears the before request handler
 	 * @since 0.1
-	 * @deprecated As of 0.3 the before request handler has been succeeded by pre-request handlers. This method now does nothing.
+	 * @deprecated As of 1.0 the before request handler has been succeeded by pre-request handlers. This method now does nothing.
 	 */
 	@Deprecated
 	public void clearBeforeRequestHandler() {}

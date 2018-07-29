@@ -34,6 +34,7 @@ public class TwisterCache {
 	 * Cached 404 pages for domains.
 	 * Key: Domain
 	 * Value: Cached 404 page
+	 * @since 1.0
 	 */
 	public static HashMap<String,String> _404S_ = new HashMap<String,String>();
 }

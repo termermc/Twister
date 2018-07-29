@@ -1,4 +1,4 @@
-=== Version 0.3 ===
+=== Version 1.0 ===
 This version is meant to add many important features that were lacking in previous releases
 by introducing a routing API, individual 404 pages for domains, a database library for
 several SQL databases, and PreRequestHandlers for manipulating requests before they get

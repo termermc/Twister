@@ -9,7 +9,7 @@ import java.net.URL;
 /**
  * Utility class to read files and HTTP content
  * @author termer
- * @since 0.3
+ * @since 1.0
  */
 public class Reader {
 	/**
@@ -17,7 +17,7 @@ public class Reader {
 	 * @param path the path to the file
 	 * @return the contents of the file as a String
 	 * @throws IOException if the file does not exist, or reading it fails
-	 * @since 0.3
+	 * @since 1.0
 	 */
 	public static String readFile(String path) throws IOException {
 		StringBuilder fileData = new StringBuilder(1000);//Constructs a string buffer with no characters in it and the specified initial capacity
@@ -41,7 +41,7 @@ public class Reader {
 	 * @param url the URL
 	 * @return the URL response as a String
 	 * @throws IOException if reading the stream fails
-	 * @since 0.3
+	 * @since 1.0
 	 */
 	public static String readHTTP(String url) throws IOException {
 		StringBuilder sb = new StringBuilder();

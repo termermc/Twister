@@ -73,7 +73,7 @@ public class Domain {
 	/**
 	 * Returns whether the domain has a "404.html" file, or a cached version
 	 * @return whether the domain has a "404.html" file, or a cached version
-	 * @since 0.3
+	 * @since 1.0
 	 */
 	public boolean has404() {
 		boolean has = false;
@@ -161,7 +161,7 @@ public class Domain {
 	 * Returns the 404 page for domain, if any
 	 * @return the 404 page for domain
 	 * @throws IOException if reading the domain's 404 page fails
-	 * @since 0.3
+	 * @since 1.0
 	 */
 	public String get404() throws IOException {
 		String r= null;
@@ -219,7 +219,7 @@ public class Domain {
 	 * @param res the response
 	 * @return the processed 404 page
 	 * @throws IOException if reading the 404 document fails
-	 * @since 0.3
+	 * @since 1.0
 	 */
 	public String getProcessed404(Request req, Response res) throws IOException {
 		String r = get404();

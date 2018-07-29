@@ -88,7 +88,7 @@ To build Twister, you must include [Zip4J](http://www.lingala.net/zip4j/) and [S
 
 NOTE: It is recommended that you use maven to include Spark, as it will automatically download spark dependencies.
 
-NOTE: To build the current indev version (0.3) you will need to include [UniversalDB](https://github.com/TermerMC/UniversalDB) in the classpath, as well as all the other libraries listed above.
+NOTE: To build the current indev version (1.0) you will need to include [UniversalDB](https://github.com/TermerMC/UniversalDB) in the classpath, as well as all the other libraries listed above.
 
 # How do I create a module?
 An example module can be found at https://github.com/termermc/ExampleTwisterModule with instructions on how to build and API examples.
@@ -99,11 +99,11 @@ Here: https://termer.net/javadocs/twister/
 Click the version you want, and you will be presented with the Javadoc.
 
 # Current development version
-The current version being developed is version **0.3**, and additionally requires the [UniversalDB](https://github.com/TermerMC/UniversalDB) library to compile. In 0.3, routes, individual 404 pages for domains, and pre-request handlers are being added.
+The current version being developed is version **1.0**, and additionally requires the [UniversalDB](https://github.com/TermerMC/UniversalDB) library to compile. In 1.0, routes, individual 404 pages for domains, and pre-request handlers are being added.
 
 Checklist:
   - **DONE** Routes
   - **DONE** Individual 404 pages for domains
   - **DONE** Inclusion of the UniversalDB library
   - **DONE** PreRequestHandlers to handle requests before they are sent to the request processor
-  - **TODO** Send non-HTML files properly in domains
+  - **DONE** Send non-HTML files properly in domains

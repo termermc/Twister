@@ -1,4 +1,6 @@
 # Twister
+![Twister logo](https://termer.net/twister_small.png)
+
 A fully featured webserver framework built on top of Twist
 
 # What does Twister offer?
@@ -13,6 +15,7 @@ It include the following:
   - All the features in Twist
   - Support for GET, POST, DELETE, and PUT handlers
   - Support for pre-request handlers
+  - Support for route handlers
   - Support for static document manipulation before response
   - Easy configurable redirects
   - File caching for lightning-quick responses
@@ -21,6 +24,7 @@ It include the following:
   - Shutting down the server via API
   - Portable module support with access to server API
   - Dependency loading
+  - Simple database interaction with UniversalDB
   - Webpage rendering API
   - Module management via API
   - Easy configuration API using Maps
@@ -84,11 +88,9 @@ Domain redirect files are useful for link shortening, as well as fixing links th
  ```
 
 # How do I build it?
-To build Twister, you must include [Zip4J](http://www.lingala.net/zip4j/) and [SparkJava](https://github.com/perwendel/spark) in the classpath, and then build as a runnable jar.
+To build Twister, you must include [Zip4J](http://www.lingala.net/zip4j/), [SparkJava](https://github.com/perwendel/spark) and [UniversalDB](https://github.com/TermerMC/UniversalDB) in the classpath, and then build as a runnable jar.
 
-NOTE: It is recommended that you use maven to include Spark, as it will automatically download spark dependencies.
-
-NOTE: To build the current indev version (1.0) you will need to include [UniversalDB](https://github.com/TermerMC/UniversalDB) in the classpath, as well as all the other libraries listed above.
+NOTE: It is recommended that you use maven to include Spark and Zip4J, as it will automatically download dependencies.
 
 # How do I create a module?
 An example module can be found at https://github.com/termermc/ExampleTwisterModule with instructions on how to build and API examples.
@@ -99,11 +101,4 @@ Here: https://termer.net/javadocs/twister/
 Click the version you want, and you will be presented with the Javadoc.
 
 # Current development version
-The current version being developed is version **1.0**, and additionally requires the [UniversalDB](https://github.com/TermerMC/UniversalDB) library to compile. In 1.0, routes, individual 404 pages for domains, and pre-request handlers are being added.
-
-Checklist:
-  - **DONE** Routes
-  - **DONE** Individual 404 pages for domains
-  - **DONE** Inclusion of the UniversalDB library
-  - **DONE** PreRequestHandlers to handle requests before they are sent to the request processor
-  - **DONE** Send non-HTML files properly in domains
+There is currently no indev version.

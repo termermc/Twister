@@ -332,7 +332,7 @@ public class Twister {
 					}
 				} else {
 					// Get wildcards for route, then execute the route handler
-					r = routeHandler.handle(StringFilter.processRoute(route, path));
+					r = routeHandler.handle(req, res, StringFilter.processRoute(route, path));
 				}
 			}
 		}

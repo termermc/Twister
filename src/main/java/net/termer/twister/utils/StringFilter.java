@@ -213,10 +213,12 @@ public class StringFilter {
 					if(same(parts[i+1], path.charAt(path.length()-1)+"")) {
 						tmp = tmp.substring(0, tmp.length()-1);
 					} else {
-						tmp = tmp.substring(0, path.indexOf(parts[i+1])-parts[i].length());
+						tmp = tmp.substring(0, path.lastIndexOf(parts[i+1])-parts[i].length());
 					}
 				}
-				wildcards.add(tmp);
+				if(tmp.length()>0) {
+					wildcards.add(tmp);
+				}
 			}
 		}
 		

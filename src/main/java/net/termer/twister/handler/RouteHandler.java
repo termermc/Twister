@@ -11,6 +11,8 @@ import spark.Response;
 public interface RouteHandler {
 	/**
 	 * The method to return content for a route
+	 * @param req the Request object for the request
+	 * @param res the Response object for the request
 	 * @param wildcards the text filled in for the wildcards in the route this is handling
 	 * @return content for the response
 	 * @since 1.0

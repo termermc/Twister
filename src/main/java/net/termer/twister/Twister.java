@@ -314,7 +314,6 @@ public class Twister {
 							if(handlerAvailable) {
 								r = requestHandlers.get(method).get(domain.toLowerCase()).get(path.toLowerCase()).handle(req, res);
 							} else {
-								System.out.println("yeet"+path);
 								r = DocumentBuilder.loadDocument(domain, path, req, res);
 							}
 						}

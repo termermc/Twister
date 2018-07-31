@@ -36,7 +36,7 @@ public class Twister {
 	 * Twister version
 	 * @since 0.1
 	 */
-	public static double _VERSION_ = 1.0;
+	public static double _VERSION_ = 1.1;
 	
 	/**
 	 * Shared variables for using across modules
@@ -415,7 +415,9 @@ public class Twister {
 						"caching: "+Settings.getDefault("caching")+"\n\n"+
 						"# The interval in seconds when Twister should\n"+
 						"# update the cached files in RAM\n"+
-						"caching-interval: "+Settings.getDefault("caching-interval");
+						"caching-interval: "+Settings.getDefault("caching-interval")+"\n\n"+
+						"# Enable/Disable embedded scripting\n"+
+						"scripting: "+Settings.getDefault("scripting");
 				Writer.print(stngs, settingsFile);
 			}
 		} catch(IOException e) {

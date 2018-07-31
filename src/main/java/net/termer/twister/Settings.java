@@ -33,6 +33,7 @@ public class Settings {
 		_DEFAULTS_.put("default-domain", "localhost");
 		_DEFAULTS_.put("caching", "true");
 		_DEFAULTS_.put("caching-interval", "600");
+		_DEFAULTS_.put("scripting", "false");
 		
 		if(file.exists()) {
 			Twister.settings = Config.parseConfig(file, ":", "#");

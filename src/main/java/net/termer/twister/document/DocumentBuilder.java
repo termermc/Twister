@@ -213,6 +213,15 @@ public class DocumentBuilder {
 						if(dom.hasBottom()) {
 							r+=dom.getProcessedBottom(req, res);
 						}
+						
+						if(Boolean.parseBoolean(Settings.get("scripting"))) {
+							HTMLDocumentResponse docResp = new HTMLDocumentResponse(path, domain, domain+path, r);
+							if(ScriptProcessor.current == null) {
+								ScriptProcessor.current = new ScriptProcessor();
+							}
+							ScriptProcessor.current.process(docResp, req, res);
+							r = docResp.getText();
+						}
 					} else {
 						// Load as file
 						res.raw().getOutputStream().write(Files.readAllBytes(Paths.get(document.getPath())));
@@ -286,12 +295,6 @@ public class DocumentBuilder {
 			HTMLDocumentResponse docResp = new HTMLDocumentResponse(path, domain, domain+path, text);
 			for(DocumentProcessor dp : _DOCUMENT_PROCESSORS_.get(domain)) {
 				dp.process(docResp, req, res);
-			}
-			if(Boolean.parseBoolean(Settings.get("scripting"))) {
-				if(ScriptProcessor.current == null) {
-					ScriptProcessor.current = new ScriptProcessor();
-				}
-				ScriptProcessor.current.process(docResp, req, res);
 			}
 			r = docResp.getText();
 		}

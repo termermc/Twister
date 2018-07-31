@@ -14,6 +14,7 @@ import net.termer.twister.Settings;
 import net.termer.twister.Twister;
 import net.termer.twister.caching.TwisterCache;
 import net.termer.twister.utils.Domain;
+import net.termer.twister.utils.ScriptProcessor;
 import net.termer.twister.utils.StringFilter;
 
 /**
@@ -285,6 +286,12 @@ public class DocumentBuilder {
 			HTMLDocumentResponse docResp = new HTMLDocumentResponse(path, domain, domain+path, text);
 			for(DocumentProcessor dp : _DOCUMENT_PROCESSORS_.get(domain)) {
 				dp.process(docResp, req, res);
+			}
+			if(Boolean.parseBoolean(Settings.get("scripting"))) {
+				if(ScriptProcessor.current == null) {
+					ScriptProcessor.current = new ScriptProcessor();
+				}
+				ScriptProcessor.current.process(docResp, req, res);
 			}
 			r = docResp.getText();
 		}

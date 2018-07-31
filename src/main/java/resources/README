@@ -1,3 +1,17 @@
+=== Version 1.1 ===
+Very small release, but with a big feature.
+This release includes embedded scripting in HTML files with Java, much like PHP.
+
+Changes in this release:
+  - Added embedded Java scripting in HTML documents
+
+New fields added to twister.ini:
+  - scripting
+      Default value: false
+      Description:
+        Sets whether scripting is enabled in HTML documents
+
+
 === Version 1.0 ===
 This version is meant to add many important features that were lacking in previous releases
 by introducing a routing API, individual 404 pages for domains, a database library for

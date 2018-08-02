@@ -13,6 +13,7 @@ import spark.Response;
 import net.termer.twister.Settings;
 import net.termer.twister.Twister;
 import net.termer.twister.caching.TwisterCache;
+import net.termer.twister.utils.ContentType;
 import net.termer.twister.utils.Domain;
 import net.termer.twister.utils.ScriptProcessor;
 import net.termer.twister.utils.StringFilter;
@@ -88,118 +89,12 @@ public class DocumentBuilder {
 				}
 				if(document.exists()) {
 					String[] parts = document.getName().split("\\.");
-					String ending = parts[parts.length-1];
-					String filetype = "application/octet-stream";
+					String ending = "";
 					if(document.getName().contains(".")) {
-						
-						if(ending.equalsIgnoreCase("html")) {
-							filetype = "text/html";
-						} else if(ending.equalsIgnoreCase("txt")) {
-							filetype = "text/plain";
-						} else if(ending.equalsIgnoreCase("js")) {
-							filetype = "application/javascript";
-						} else if(ending.equalsIgnoreCase("aac")) {
-							filetype = "audio/aac";
-						} else if(ending.equalsIgnoreCase("avi")) {
-							filetype = "video/x-msvideo";
-						} else if(ending.equalsIgnoreCase("bmp")) {
-							filetype = "image/bmp";
-						} else if(ending.equalsIgnoreCase("bz")) {
-							filetype = "application/x-bzip";
-						} else if(ending.equalsIgnoreCase("bz2")) {
-							filetype = "application/x-bzip2";
-						} else if(ending.equalsIgnoreCase("")) {
-							filetype = "";
-						} else if(ending.equalsIgnoreCase("css")) {
-							filetype = "text/css";
-						} else if(ending.equalsIgnoreCase("doc")) {
-							filetype = "msword";
-						} else if(ending.equalsIgnoreCase("docx")) {
-							filetype = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-						} else if(ending.equalsIgnoreCase("eot")) {
-							filetype = "application/vnd.ms-fontobject";
-						} else if(ending.equalsIgnoreCase("epub")) {
-							filetype = "application/epub+zip";
-						} else if(ending.equalsIgnoreCase("htm")) {
-							filetype = "text/html";
-						} else if(ending.equalsIgnoreCase("gif")) {
-							filetype = "image/gif";
-						} else if(ending.equalsIgnoreCase("ico")) {
-							filetype = "image/x-icon";
-						} else if(ending.equalsIgnoreCase("jar")) {
-							filetype = "application/java-archive";
-						} else if(ending.equalsIgnoreCase("jpg")) {
-							filetype = "image/jpeg";
-						} else if(ending.equalsIgnoreCase("jpeg")) {
-							filetype = "image/jpeg";
-						} else if(ending.equalsIgnoreCase("json")) {
-							filetype = "application/json";
-						} else if(ending.equalsIgnoreCase("mid")) {
-							filetype = "audio/midi";
-						} else if(ending.equalsIgnoreCase("midi")) {
-							filetype = "audio/midi";
-						} else if(ending.equalsIgnoreCase("mpeg")) {
-							filetype = "audio/mpeg";
-						} else if(ending.equalsIgnoreCase("odp")) {
-							filetype = "application/vnd.oasis.opendocument.presentation";
-						} else if(ending.equalsIgnoreCase("ods")) {
-							filetype = "application/vnd.oasis.opendocument.spreadsheet";
-						} else if(ending.equalsIgnoreCase("odt")) {
-							filetype = "application/vnd.oasis.opendocument.text";
-						} else if(ending.equalsIgnoreCase("oga")) {
-							filetype = "audio/ogg";
-						} else if(ending.equalsIgnoreCase("ogv")) {
-							filetype = "video/ogg";
-						} else if(ending.equalsIgnoreCase("ogx")) {
-							filetype = "application/ogg";
-						} else if(ending.equalsIgnoreCase("ogg")) {
-							filetype = "audio/ogg";
-						} else if(ending.equalsIgnoreCase("png")) {
-							filetype = "image/png";
-						} else if(ending.equalsIgnoreCase("pdf")) {
-							filetype = "application/pdf";
-						} else if(ending.equalsIgnoreCase("ppt")) {
-							filetype = "application/vnd.ms-powerpoint";
-						} else if(ending.equalsIgnoreCase("pptx")) {
-							filetype = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
-						} else if(ending.equalsIgnoreCase("rar")) {
-							filetype = "application/x-rar-compressed";
-						} else if(ending.equalsIgnoreCase("rtf")) {
-							filetype = "application/rtf";
-						} else if(ending.equalsIgnoreCase("sh")) {
-							filetype = "application/x-sh";
-						} else if(ending.equalsIgnoreCase("svg")) {
-							filetype = "image/svg+xml";
-						} else if(ending.equalsIgnoreCase("swf")) {
-							filetype = "application/x-shockwave-flash";
-						} else if(ending.equalsIgnoreCase("tar")) {
-							filetype = "application/x-tar";
-						} else if(ending.equalsIgnoreCase("wav")) {
-							filetype = "audio/wave";
-						} else if(ending.equalsIgnoreCase("weba")) {
-							filetype = "audio/webm";
-						} else if(ending.equalsIgnoreCase("webm")) {
-							filetype = "video/webm";
-						} else if(ending.equalsIgnoreCase("webp")) {
-							filetype = "image/webp";
-						} else if(ending.equalsIgnoreCase("woff")) {
-							filetype = "font/woff";
-						} else if(ending.equalsIgnoreCase("woff2")) {
-							filetype = "font/woff2";
-						} else if(ending.equalsIgnoreCase("xhtml")) {
-							filetype = "application/xhtml+xml";
-						} else if(ending.equalsIgnoreCase("xls")) {
-							filetype = "application/vnd.ms-excel";
-						} else if(ending.equalsIgnoreCase("xlsx")) {
-							filetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-						} else if(ending.equalsIgnoreCase("xml")) {
-							filetype = "application/xml";
-						} else if(ending.equalsIgnoreCase("zip")) {
-							filetype = "application/zip";
-						} else if(ending.equalsIgnoreCase("7z")) {
-							filetype = "application/x-7z-compressed";
-						}
+						ending = parts[parts.length-1];
 					}
+					String filetype = ContentType.getForExtension(ending);
+					
 					res.type(filetype);
 					
 					if(StringFilter.same(filetype, "text/html")) {
@@ -214,7 +109,10 @@ public class DocumentBuilder {
 							r+=dom.getProcessedBottom(req, res);
 						}
 						
+						System.out.println("yoot");
+						
 						if(Boolean.parseBoolean(Settings.get("scripting"))) {
+							System.out.println("yeet");
 							HTMLDocumentResponse docResp = new HTMLDocumentResponse(path, domain, domain+path, r);
 							if(ScriptProcessor.current == null) {
 								ScriptProcessor.current = new ScriptProcessor();

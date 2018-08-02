@@ -19,6 +19,7 @@ import net.termer.twister.caching.CachingThread;
 import net.termer.twister.document.DocumentBuilder;
 import net.termer.twister.document.DocumentProcessor;
 import net.termer.twister.utils.Config;
+import net.termer.twister.utils.ContentType;
 import net.termer.twister.utils.StringFilter;
 import net.termer.twister.utils.Writer;
 import spark.Request;
@@ -116,6 +117,9 @@ public class Twister {
 		routeHandlers.add(new HashMap<String,HashMap<String,RouteHandler>>()); // POST
 		routeHandlers.add(new HashMap<String,HashMap<String,RouteHandler>>()); // DELETE
 		routeHandlers.add(new HashMap<String,HashMap<String,RouteHandler>>()); // PUT
+		
+		// Apply basic content types
+		ContentType.applyBasicTypes();
 		
 		// Extract README
 		try {

@@ -99,11 +99,8 @@ Here: https://termer.net/javadocs/twister/
 Click the version you want, and you will be presented with the Javadoc.
 
 # Current development version
-The current version being developed is version **1.0**, and additionally requires the [UniversalDB](https://github.com/TermerMC/UniversalDB) library to compile. In 1.0, routes, individual 404 pages for domains, and pre-request handlers are being added.
+The current version being developed is version **1.1**. In 1.1, embedded Java scripting inside of HTML documents
+if being added.
 
 Checklist:
-  - **DONE** Routes
-  - **DONE** Individual 404 pages for domains
-  - **DONE** Inclusion of the UniversalDB library
-  - **DONE** PreRequestHandlers to handle requests before they are sent to the request processor
-  - **DONE** Send non-HTML files properly in domains
+  - **DONE** Embedded Java scripting inside of HTML documents

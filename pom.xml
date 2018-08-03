@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.termer.twister</groupId>
   <artifactId>Twister</artifactId>
-  <version>0.3</version>
+  <version>1.1</version>
   <name>Twister</name>
   <description>A fully-featured, module based webserver written in Java</description>
   <packaging>war</packaging>

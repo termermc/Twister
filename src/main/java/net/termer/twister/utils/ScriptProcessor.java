@@ -26,6 +26,7 @@ public class ScriptProcessor implements DocumentProcessor {
 					inter.set("response", res);
 					inter.set("twister", Twister.current());
 					inter.set("domain", doc.getDomain());
+					inter.set("method", req.requestMethod());
 				} catch (EvalError ex) {
 					ex.printStackTrace();
 				}

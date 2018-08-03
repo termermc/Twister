@@ -1,6 +1,7 @@
 === Version 1.1 ===
 Very small release, but with a big feature.
-This release includes embedded scripting in HTML files with Java, much like PHP.
+This release includes embedded scripting in HTML files with Java, much like PHP, as well
+as some minor improvements and fixes.
 
 Changes in this release:
   - Added embedded Java scripting in HTML documents

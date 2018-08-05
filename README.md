@@ -84,7 +84,7 @@ Domain redirect files are useful for link shortening, as well as fixing links th
  ```
 
 # How do I build it?
-To build Twister, you must include [Zip4J](http://www.lingala.net/zip4j/) and [SparkJava](https://github.com/perwendel/spark) in the classpath, and then build as a runnable jar.
+To build, simply run `mvn install` in the repository, and you will get a file called `Twister-x.x-jar-with-dependencies.jar` in `target/`.
 
 NOTE: It is recommended that you use maven to include Spark, as it will automatically download spark dependencies.
 

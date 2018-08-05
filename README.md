@@ -90,6 +90,8 @@ Domain redirect files are useful for link shortening, as well as fixing links th
 # How do I build it?
 To build, simply run `mvn install` in the project directory. You will get a file called `Twister-x.x-jar-with-dependencies.jar` in the `target` directory.
 
+NOTE: It recommended that you also include [UniversalDB](https://github.com/termermc/UniversalDB) in your build as a dependency.
+
 # How do I create a module?
 An example module can be found at https://github.com/termermc/ExampleTwisterModule with instructions on how to build and API examples.
 

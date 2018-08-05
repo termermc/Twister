@@ -1,4 +1,6 @@
 # Twister
+![Twister logo](https://termer.net/twister_small.png)
+
 A fully featured webserver framework built on top of Twist
 
 # What does Twister offer?
@@ -13,6 +15,7 @@ It include the following:
   - All the features in Twist
   - Support for GET, POST, DELETE, and PUT handlers
   - Support for pre-request handlers
+  - Support for route handlers
   - Support for static document manipulation before response
   - Easy configurable redirects
   - File caching for lightning-quick responses
@@ -21,6 +24,7 @@ It include the following:
   - Shutting down the server via API
   - Portable module support with access to server API
   - Dependency loading
+  - Simple database interaction with UniversalDB
   - Webpage rendering API
   - Module management via API
   - Easy configuration API using Maps
@@ -84,11 +88,15 @@ Domain redirect files are useful for link shortening, as well as fixing links th
  ```
 
 # How do I build it?
+<<<<<<< HEAD
 To build, simply run `mvn install` in the repository, and you will get a file called `Twister-x.x-jar-with-dependencies.jar` in `target/`.
 
 NOTE: It is recommended that you use maven to include Spark, as it will automatically download spark dependencies.
+=======
+To build Twister, you must include [Zip4J](http://www.lingala.net/zip4j/), [SparkJava](https://github.com/perwendel/spark) and [UniversalDB](https://github.com/TermerMC/UniversalDB) in the classpath, and then build as a runnable jar.
+>>>>>>> a2b85c3e90e08cba5478a643957d946374a0ae7b
 
-NOTE: To build the current indev version (1.0) you will need to include [UniversalDB](https://github.com/TermerMC/UniversalDB) in the classpath, as well as all the other libraries listed above.
+NOTE: It is recommended that you use maven to include Spark and Zip4J, as it will automatically download dependencies.
 
 # How do I create a module?
 An example module can be found at https://github.com/termermc/ExampleTwisterModule with instructions on how to build and API examples.
@@ -99,8 +107,12 @@ Here: https://termer.net/javadocs/twister/
 Click the version you want, and you will be presented with the Javadoc.
 
 # Current development version
+<<<<<<< HEAD
 The current version being developed is version **1.1**. In 1.1, embedded Java scripting inside of HTML documents
 if being added.
 
 Checklist:
   - **DONE** Embedded Java scripting inside of HTML documents
+=======
+There is currently no indev version.
+>>>>>>> a2b85c3e90e08cba5478a643957d946374a0ae7b

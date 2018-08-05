@@ -86,15 +86,12 @@ Domain redirect files are useful for link shortening, as well as fixing links th
   Example:
     /redirect/ > http://www.example.com/
  ```
-
+ 
 # How do I build it?
-<<<<<<< HEAD
-To build, simply run `mvn install` in the repository, and you will get a file called `Twister-x.x-jar-with-dependencies.jar` in `target/`.
+To build, simply run `mvn install` in the project directory. You will get a file called `Twister-x.x-jar-with-dependencies.jar` in the `target` directory.
 
-NOTE: It is recommended that you use maven to include Spark, as it will automatically download spark dependencies.
 =======
 To build Twister, you must include [Zip4J](http://www.lingala.net/zip4j/), [SparkJava](https://github.com/perwendel/spark) and [UniversalDB](https://github.com/TermerMC/UniversalDB) in the classpath, and then build as a runnable jar.
->>>>>>> a2b85c3e90e08cba5478a643957d946374a0ae7b
 
 NOTE: It is recommended that you use maven to include Spark and Zip4J, as it will automatically download dependencies.
 
@@ -107,7 +104,6 @@ Here: https://termer.net/javadocs/twister/
 Click the version you want, and you will be presented with the Javadoc.
 
 # Current development version
-<<<<<<< HEAD
 The current version being developed is version **1.1**. In 1.1, embedded Java scripting inside of HTML documents
 if being added.
 
@@ -115,4 +111,3 @@ Checklist:
   - **DONE** Embedded Java scripting inside of HTML documents
 =======
 There is currently no indev version.
->>>>>>> a2b85c3e90e08cba5478a643957d946374a0ae7b

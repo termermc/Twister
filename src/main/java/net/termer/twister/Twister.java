@@ -233,6 +233,11 @@ public class Twister {
 		}
 		domain=domain.toLowerCase();
 		
+		// Process domain for linked domains
+		if(linkedDomains.containsKey(domain)) {
+			domain = linkedDomains.get(domain);
+		}
+		
 		// Execute pre-request handlers
 		PreRequestOptions preOptions = new PreRequestOptions(req, res, domain);
 		

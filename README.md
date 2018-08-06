@@ -17,6 +17,7 @@ It include the following:
   - Support for pre-request handlers
   - Support for route handlers
   - Support for static document manipulation before response
+  - Embedded PHP-like scripting inside of HTML pages with Java
   - Easy configurable redirects
   - File caching for lightning-quick responses
   - Reloading configurations without restarting the server

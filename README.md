@@ -106,5 +106,3 @@ if being added.
 
 Checklist:
   - **DONE** Embedded Java scripting inside of HTML documents
-=======
-There is currently no indev version.

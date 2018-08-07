@@ -34,6 +34,8 @@ public class Settings {
 		_DEFAULTS_.put("caching", "true");
 		_DEFAULTS_.put("caching-interval", "600");
 		_DEFAULTS_.put("scripting", "false");
+		_DEFAULTS_.put("https-redirect", "false");
+		_DEFAULTS_.put("https-redirect-port", "80");
 		
 		if(file.exists()) {
 			Twister.settings = Config.parseConfig(file, ":", "#");

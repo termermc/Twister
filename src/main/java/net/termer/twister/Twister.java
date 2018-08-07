@@ -24,6 +24,8 @@ import net.termer.twister.utils.StringFilter;
 import net.termer.twister.utils.Writer;
 import spark.Request;
 import spark.Response;
+import spark.Route;
+import spark.Service;
 
 /**
  * The Twister main class.
@@ -91,6 +93,7 @@ public class Twister {
 	
 	private CachingThread cachingThread = null;
 	
+	private Service HttpsRedirector = null;
 	/**
 	 * Returns the current Twister instance
 	 * @return the current Twister instance
@@ -151,6 +154,7 @@ public class Twister {
 		if(settings.containsKey("keystore") && settings.containsKey("keystore-password")) {
 			File ks = new File(settings.get("keystore"));
 			if(ks.exists()) {
+				// Load keystore and enable HTTPS
 				secure(settings.get("keystore"),settings.get("keystore-password"),null,null);
 			}
 		}
@@ -426,7 +430,12 @@ public class Twister {
 						"# update the cached files in RAM\n"+
 						"caching-interval: "+Settings.getDefault("caching-interval")+"\n\n"+
 						"# Enable/Disable embedded scripting\n"+
-						"scripting: "+Settings.getDefault("scripting");
+						"scripting: "+Settings.getDefault("scripting")+"\n\n"+
+						"# Whether an HTTPS redirector should be started\n"+
+						"# if a keystore is used\n"+
+						"https-redirect: "+Settings.getDefault("https-redirect")+"\n\n"+
+						"# What port the HTTP redirect should run on if enabled\n"+
+						"https-redirect-port: "+Settings.getDefault("https-redirect-port");
 				Writer.print(stngs, settingsFile);
 			}
 		} catch(IOException e) {
@@ -511,6 +520,31 @@ public class Twister {
 		// Re-cache files
 		CachingThread.cache404();
 		CachingThread.cacheTopsAndBottoms();
+		
+		// Enable or disable HTTP redirector
+		if(settings.containsKey("keystore") && settings.containsKey("keystore-password")) {
+			if(Boolean.parseBoolean(Settings.get("https-redirect"))) {
+				HttpsRedirector = Service.ignite();
+				HttpsRedirector.port(Integer.parseInt(Settings.get("https-redirect-port")));
+				HttpsRedirector.ipAddress(Settings.get("ip"));
+				HttpsRedirector.get("*", new Route() {
+					public Object handle(Request req, Response res) throws Exception {
+						res.redirect(req.url().replace("http://", "https://"));
+						return "";
+					}
+				});
+			} else {
+				if(HttpsRedirector != null) {
+					HttpsRedirector.stop();
+					HttpsRedirector = null;
+				}
+			}
+		} else {
+			if(HttpsRedirector != null) {
+				HttpsRedirector.stop();
+				HttpsRedirector = null;
+			}
+		}
 	}
 	
 	/**

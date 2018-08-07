@@ -17,7 +17,11 @@ New fields added to twister.ini:
   - https-redirect
       Default value: false
       Description:
-        Sets whether an HTTPS redirector should be started on port 80 if HTTPS is enabled
+        Sets whether an HTTPS redirector should be started if HTTPS is enabled
+  - https-redirect-port
+      Default value: 80
+      Description:
+       Which port the HTTPS redirector should be started on, if enabled
 
 
 === Version 1.0 ===

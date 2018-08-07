@@ -108,4 +108,4 @@ if being added.
 Checklist:
   - **DONE** Embedded Java scripting inside of HTML documents
   - **TODO** Dynamic module unloading
-  - **DONE** HTTPS redirection on port 80
+  - **DONE** HTTPS redirection

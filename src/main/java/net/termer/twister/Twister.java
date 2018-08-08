@@ -93,7 +93,7 @@ public class Twister {
 	
 	private CachingThread cachingThread = null;
 	
-	private Service HttpsRedirector = null;
+	private Service httpsRedirector = null;
 	/**
 	 * Returns the current Twister instance
 	 * @return the current Twister instance
@@ -523,16 +523,25 @@ public class Twister {
 		
 		// Enable or disable HTTP redirector
 		if(settings.containsKey("keystore") && settings.containsKey("keystore-password")) {
+			if(httpsRedirector != null) {
+				httpsRedirector.stop();
+				httpsRedirector = null;
+			}
 			if(Boolean.parseBoolean(Settings.get("https-redirect"))) {
-				HttpsRedirector = Service.ignite();
-				HttpsRedirector.port(Integer.parseInt(Settings.get("https-redirect-port")));
-				HttpsRedirector.ipAddress(Settings.get("ip"));
-				HttpsRedirector.get("*", new Route() {
+				httpsRedirector = Service.ignite();
+				httpsRedirector.port(Integer.parseInt(Settings.get("https-redirect-port")));
+				httpsRedirector.ipAddress(Settings.get("ip"));
+				httpsRedirector.get("*", new Route() {
 					public Object handle(Request req, Response res) throws Exception {
 						res.redirect(req.url().replace("http://", "https://"));
 						return "";
 					}
 				});
+			}
+		} else {
+			if(httpsRedirector != null) {
+				httpsRedirector.stop();
+				httpsRedirector = null;
 			}
 		}
 	}

@@ -533,16 +533,6 @@ public class Twister {
 						return "";
 					}
 				});
-			} else {
-				if(HttpsRedirector != null) {
-					HttpsRedirector.stop();
-					HttpsRedirector = null;
-				}
-			}
-		} else {
-			if(HttpsRedirector != null) {
-				HttpsRedirector.stop();
-				HttpsRedirector = null;
 			}
 		}
 	}

@@ -50,6 +50,7 @@ public class ContentType {
 	 */
 	public static void applyBasicTypes() {
 		TYPES.put("html", "text/html");
+		TYPES.put("php", "text/html");
 		TYPES.put("txt", "text/plain");
 		TYPES.put("js", "application/javascript");
 		TYPES.put("aac", "audio/aac");

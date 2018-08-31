@@ -80,20 +80,7 @@ public class StringFilter {
 	 * @since 0.1
 	 */
 	public static boolean same(String str1, String str2) {
-		boolean same = true;
-		
-		if(str1.length()==str2.length()) {
-			for(int i = 0; i < str1.length(); i++) {
-				if(str1.charAt(i)!=str2.charAt(i)) {
-					same = false;
-					break;
-				}
-			}
-		} else {
-			same = false;
-		}
-		
-		return same;
+		return str1.equals(str2);
 	}
 	
 	/**

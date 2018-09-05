@@ -12,3 +12,4 @@ twister.ini
 /globalstatic/
 /domains/
 /dependencies/
+/php_tmp/

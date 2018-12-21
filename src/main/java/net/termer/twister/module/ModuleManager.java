@@ -14,7 +14,6 @@ import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.termer.twister.Twister;
 import net.termer.twister.exception.JarLoaderException;
-import net.termer.twister.utils.StringFilter;
 
 /**
  * Module Manager class
@@ -54,8 +53,6 @@ public class ModuleManager {
 	 */
 	public static ArrayList<TwisterModule> _HIGH_ = new ArrayList<TwisterModule>();
 	
-	private static ArrayList<URLClassLoader> _DependencyClasses = new ArrayList<URLClassLoader>();
-	
 	/**
 	 * Loads all dependencies, then
 	 * loads and starts all TwisterModules
@@ -63,15 +60,30 @@ public class ModuleManager {
 	 * @throws IOException if closing the ClassLoader fails
 	 * @since 0.1
 	 */
-	@SuppressWarnings("deprecation")
 	public static void loadModules() throws ZipException, IOException {
-		Twister.current().logInfo("Loading modules...");
+Twister.current().logInfo("Loading modules...");
 		
 		ArrayList<URL> urls = new ArrayList<URL>();
 		ArrayList<String> classes = new ArrayList<String>();
 		
 		for(File jar : new File("dependencies/").listFiles()) {
-			_DependencyClasses.add(new URLClassLoader(new URL[] {jar.toURL()}));
+			if(jar.getName().toLowerCase().endsWith(".jar")) {
+				ZipFile zf = new ZipFile(jar.getAbsolutePath());
+				if(zf.isValidZipFile()) {
+					urls.add(new URL("file:"+jar.getAbsolutePath()));
+					JarFile jf = new JarFile(jar.getAbsolutePath());
+					Enumeration<JarEntry> ent = jf.entries();
+					while(ent.hasMoreElements()) {
+						String name = ent.nextElement().getName();
+						if(name.toLowerCase().endsWith(".class")) {
+							classes.add(name.replace("/", ".").replace(".class", ""));
+						}
+					}
+					jf.close();
+				} else {
+					throw new JarLoaderException("File is not a valid jarfile");
+				}
+			}
 		}
 		
 		ArrayList<String> launchClasses = new ArrayList<String>();
@@ -106,9 +118,9 @@ public class ModuleManager {
 				Class<?> cls = ucl.loadClass(clazz);
 				
 				for(String launchClass : launchClasses) {
-					if(StringFilter.same(launchClass, clazz)) {
+					if(launchClass.equals(clazz)) {
 						for(Class<?> inter : cls.getInterfaces()) {
-							if(StringFilter.same(inter.getTypeName(),"net.termer.twister.module.TwisterModule")) {
+							if(inter.getTypeName().equals("net.termer.twister.module.TwisterModule")) {
 								_MODULES_.add((TwisterModule) cls.newInstance());
 								break;
 							}

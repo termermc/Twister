@@ -211,4 +211,16 @@ public class StringFilter {
 		
 		return wildcards.toArray(new String[0]);
 	}
+	
+	/**
+	 * Escapes HTML by replacing less-than and greater-than symbols with &lt and &gt. 
+	 * @param content the String to escape
+	 * @return the escaped String
+	 * @since 1.1
+	 */
+	public static String escapeHTML(String content) {
+		return content
+				.replace("<", "&lt")
+				.replace(">", "&gt");
+	}
 }

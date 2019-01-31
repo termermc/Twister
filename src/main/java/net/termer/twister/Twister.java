@@ -431,6 +431,9 @@ public class Twister {
 						"caching-interval: "+Settings.getDefault("caching-interval")+"\n\n"+
 						"# Enable/Disable embedded scripting\n"+
 						"scripting: "+Settings.getDefault("scripting")+"\n\n"+
+						"# Whether exception messages will be appended\n"+
+						"# in scripting, as if out.append() were called.\n"+
+						"append-scripting-exceptions: "+Settings.getDefault("append-scripting-exceptions")+"\n\n"+
 						"# Whether an HTTPS redirector should be started\n"+
 						"# if a keystore is used\n"+
 						"https-redirect: "+Settings.getDefault("https-redirect")+"\n\n"+

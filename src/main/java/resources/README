@@ -14,6 +14,11 @@ New fields added to twister.ini:
       Default value: false
       Description:
         Sets whether scripting is enabled in HTML documents
+  - append-scripting-exceptions
+      Default value: false
+      Description:
+        Sets whether exception messages will be appended in scripting, as if out.append()
+        were called.
   - https-redirect
       Default value: false
       Description:

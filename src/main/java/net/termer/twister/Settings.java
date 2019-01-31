@@ -36,6 +36,7 @@ public class Settings {
 		_DEFAULTS_.put("scripting", "false");
 		_DEFAULTS_.put("https-redirect", "false");
 		_DEFAULTS_.put("https-redirect-port", "80");
+		_DEFAULTS_.put("append-scripting-exceptions", "false");
 		
 		if(file.exists()) {
 			Twister.settings = Config.parseConfig(file, ":", "#");

@@ -1,7 +1,8 @@
-package net.termer.twister.utils;
+package net.termer.twister.scripting;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import bsh.EvalError;
@@ -11,6 +12,7 @@ import net.termer.twister.Twister;
 import net.termer.twister.document.DocumentBuilder;
 import net.termer.twister.document.DocumentProcessor;
 import net.termer.twister.document.HTMLDocumentResponse;
+import net.termer.twister.utils.Reader;
 import spark.Request;
 import spark.Response;
 
@@ -21,6 +23,27 @@ import spark.Response;
  * @since 1.1
  */
 public class ScriptProcessor implements DocumentProcessor {
+	// The list of VariableProviders to be executed before a document is processed for scripting
+	private static ArrayList<VariableProvider> _VarProviders = new ArrayList<VariableProvider>();
+	
+	/**
+	 * Registers a new VariableProvider for providing data to scripts
+	 * @param provider the VariableProvider to register
+	 * @since 1.1
+	 */
+	public static void addVariableProvider(VariableProvider provider) {
+		_VarProviders.add(provider);
+	}
+	
+	/**
+	 * Removes the specified VariableProvider from the pool of registered providers
+	 * @param provider the VariableProvider to remove
+	 * @since 1.1
+	 */
+	public static void removeVariableProvider(VariableProvider provider) {
+		_VarProviders.remove(provider);
+	}
+	
 	/**
 	 * Method to process a document and its scripts
 	 * @param path the path to the document to process
@@ -102,6 +125,11 @@ public class ScriptProcessor implements DocumentProcessor {
 				vars.put("twister", Twister.current());
 				vars.put("domain", doc.getDomain());
 				vars.put("method", req.requestMethod());
+				
+				// Process the variables map using registered VariableProviders
+				for(VariableProvider provider : _VarProviders) {
+					provider.provide(doc.getDomain(), vars);
+				}
 				
 				// Run document through processor
 				doc.setText(processDocument(tmp, vars, doc.getDomain()));

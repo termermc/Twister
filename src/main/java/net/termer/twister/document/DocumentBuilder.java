@@ -13,9 +13,9 @@ import spark.Response;
 import net.termer.twister.Settings;
 import net.termer.twister.Twister;
 import net.termer.twister.caching.TwisterCache;
+import net.termer.twister.scripting.ScriptProcessor;
 import net.termer.twister.utils.ContentType;
 import net.termer.twister.utils.Domain;
-import net.termer.twister.utils.ScriptProcessor;
 import net.termer.twister.utils.StringFilter;
 
 /**

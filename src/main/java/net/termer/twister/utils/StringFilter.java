@@ -26,14 +26,14 @@ public class StringFilter {
 	public static String filter(String str) {
 		String result = "";
 		for(char ch : str.toLowerCase().toCharArray()) {
+			boolean ok = false;
 			for(char acceptableChar : acceptableChars) {
-				boolean ok = true;
-				if(ch!=acceptableChar) {
-					ok = false;
+				if(ch==acceptableChar) {
+					ok = true;
 					break;
 				}
-				if(ok) result+=ch;
 			}
+			if(ok) result+=ch;
 		}
 		return result;
 	}
@@ -45,13 +45,18 @@ public class StringFilter {
 	 * @since 0.1
 	 */
 	public static boolean acceptableString(String str) {
-		boolean ok = false;
+		boolean ok = true;
 		for(char ch : str.toLowerCase().toCharArray()) {
+			boolean charOk = false;
 			for(char acceptableChar : acceptableChars) {
 				if(ch==acceptableChar) {
-					ok = true;
+					charOk = true;
 					break;
 				}
+			}
+			if(!charOk) {
+				ok = false;
+				break;
 			}
 		}
 		return ok;
